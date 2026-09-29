@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-"""Build the self-contained animation page from the template and a fresh trace
+"""Build the self-contained interactive page from the template
 
-The trace comes straight from run_demo.build_trace, so the page and the command
-share one source of truth. The template carries a __TRACE_JSON__ placeholder that
-this script fills with the trace JSON
+The page runs the search live in the browser, so it embeds only the static facts
+(the device PIN and the real decrypt result) and inlines the two JS engines. It
+writes index.html (a full document for local use and GitHub Pages) and
+out/artifact.html (a bare fragment for publishing as an artifact)
 """
 import argparse
 import json
 from pathlib import Path
 
+import firmware
+import oracle
 import run_demo
 
 HERE = Path(__file__).resolve().parent
 TEMPLATE = HERE / "template.html"
 DEFAULT_DUMP = HERE / "data" / "backup_full.bin"
-OUT_DIR = HERE / "out"
-LOCAL_OUT = OUT_DIR / "fly_safe.html"      # full document, opens by double-click
-ARTIFACT_OUT = OUT_DIR / "artifact.html"   # bare fragment, for publishing as an artifact
-PLACEHOLDER = "__TRACE_JSON__"
+INDEX_OUT = HERE / "index.html"
+ARTIFACT_OUT = HERE / "out" / "artifact.html"
 BODY_MARK = '<div class="wrap">'
-NOISE_LEVELS = [0, 10, 20, 30]  # ms of measurement jitter, chosen by the slider
 
 
 def wrap_standalone(fragment):
-    """Wrap the artifact fragment in a full HTML document for local use
-
-    The template is authored as an artifact fragment (no document skeleton). For a
-    file opened straight from disk we add the doctype, head and body, and split the
-    fragment so its meta, title, link and style sit in the head
-    """
+    """Wrap the artifact fragment in a full HTML document for local use and Pages"""
     cut = fragment.index(BODY_MARK)
     head, body = fragment[:cut], fragment[cut:]
     return (
@@ -38,29 +33,36 @@ def wrap_standalone(fragment):
     )
 
 
-def build(dump, levels=NOISE_LEVELS):
+def build(dump):
     template = TEMPLATE.read_text()
-    if PLACEHOLDER not in template:
-        raise SystemExit(f"template is missing the {PLACEHOLDER} placeholder")
-    data = run_demo.build_dataset(dump, levels)
-    fragment = template.replace(PLACEHOLDER, json.dumps(data, separators=(",", ":")))
+    pin = firmware.extract_pin(dump)
+    decrypt = run_demo.decrypt_summary(dump)
+    fragment = (
+        template
+        .replace("__FLY_JS__", (HERE / "fly.js").read_text())
+        .replace("__NEURO_JS__", (HERE / "fly_neuro.js").read_text())
+        .replace("__DECRYPT_JSON__", json.dumps(decrypt, separators=(",", ":")))
+        .replace("__STEP_MS__", str(oracle.STEP_MS))
+        .replace("__PIN__", pin)
+    )
+    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__"):
+        if token in fragment:
+            raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    LOCAL_OUT.write_text(standalone)
+    INDEX_OUT.write_text(standalone)
+    ARTIFACT_OUT.parent.mkdir(parents=True, exist_ok=True)
     ARTIFACT_OUT.write_text(fragment)
-    return standalone, fragment, data
+    return standalone, fragment, pin
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dump", type=Path, default=DEFAULT_DUMP)
     args = parser.parse_args()
-    standalone, fragment, data = build(args.dump)
-    runs = ", ".join(f"{r['noise_ms']}ms:{r['sniffs']}sniffs(seed {r['seed']})"
-                     for r in data["runs"])
-    print(f"local  : {LOCAL_OUT}  ({len(standalone):,} bytes) - open in a browser")
-    print(f"artifact fragment: {ARTIFACT_OUT}  ({len(fragment):,} bytes)")
-    print(f"runs: {runs}")
+    standalone, fragment, pin = build(args.dump)
+    print(f"index.html      : {INDEX_OUT} ({len(standalone):,} bytes) — open in a browser / GitHub Pages")
+    print(f"artifact.html   : {ARTIFACT_OUT} ({len(fragment):,} bytes) — publish as an artifact")
+    print(f"embedded PIN    : {pin} (editable in the page)")
 
 
 if __name__ == "__main__":
