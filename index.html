@@ -75,6 +75,9 @@
   button:hover { border-color: var(--accent); color: var(--accent); }
   .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   .primary:hover { color: #fff; filter: brightness(1.05); }
+  a.ghlink { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
+    background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 16px; text-decoration: none; }
+  a.ghlink:hover { border-color: var(--accent); color: var(--accent); }
   .ctl { display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
   .ctl input[type=range] { accent-color: var(--accent); }
   .grow { flex: 1; min-width: 130px; }
@@ -164,6 +167,8 @@
   <div class="controls">
     <button class="primary" id="play">Pause</button>
     <button id="restart">New fly</button>
+    <button id="theme">◐ theme</button>
+    <a class="ghlink" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026">GitHub ↗</a>
     <div class="ctl"><label for="noise">noise</label><input type="range" id="noise" min="0" max="100" step="1" value="0"><span id="noise-val" style="min-width:38px">0 ms</span></div>
     <div class="ctl"><label for="speed">speed</label><input type="range" id="speed" min="1" max="60" value="14"></div>
     <div class="ctl grow"><div class="progress" style="width:100%"><span id="progress"></span></div></div>
@@ -545,14 +550,11 @@
     for (let i = 0; i <= 90; i += 10) c.fillText(String(i).padStart(2, "0"), ox - 6 * dpr, oy + i * cell);
   }
 
-  function cr(p0, p1, p2, p3, t) {  // Catmull-Rom
-    const t2 = t * t, t3 = t2 * t;
-    return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
-  }
   function posAt(p) {
-    const n = trace.length, i = Math.min(n - 1, Math.floor(p)), t = p - i;
-    const a = trace[Math.max(0, i - 1)], b = trace[i], c2 = trace[Math.min(n - 1, i + 1)], d = trace[Math.min(n - 1, i + 2)];
-    return [cr(a.x, b.x, c2.x, d.x, t), cr(a.y, b.y, c2.y, d.y, t)];
+    // straight-line interpolation: the real move vector between two integer PINs,
+    // no smoothing — the fly jumps the lattice and we draw the true path
+    const n = trace.length, i = Math.min(n - 1, Math.floor(p)), t = p - i, j = Math.min(n - 1, i + 1);
+    return [trace[i].x + (trace[j].x - trace[i].x) * t, trace[i].y + (trace[j].y - trace[i].y) * t];
   }
 
   function drawCartoon(ts, u, landed) {
@@ -588,6 +590,27 @@
     const p = Math.min(trace.length - 1, playhead);
     const cur2 = Math.floor(p), a = posAt(p), b = posAt(Math.min(trace.length - 1, p + 0.05));
     const fxp = ox + (a[0] + 0.5) * cell, fyp = oy + (a[1] + 0.5) * cell;
+    // fading dashed trail of the real move vectors
+    ctx.save();
+    ctx.setLineDash([Math.max(2, cell * 0.6), Math.max(2, cell * 0.6)]);
+    ctx.lineWidth = Math.max(1, cell * 0.13);
+    const trailN = 20, tStart = Math.max(0, cur2 - trailN);
+    for (let t = tStart; t < cur2; t++) {
+      const al = (t - tStart + 1) / (cur2 - tStart + 1);
+      ctx.strokeStyle = "rgba(221,119,187," + (al * 0.55) + ")";
+      ctx.beginPath();
+      ctx.moveTo(ox + (trace[t].x + 0.5) * cell, oy + (trace[t].y + 0.5) * cell);
+      ctx.lineTo(ox + (trace[t + 1].x + 0.5) * cell, oy + (trace[t + 1].y + 0.5) * cell);
+      ctx.stroke();
+    }
+    if (cur2 < trace.length - 1) {
+      ctx.strokeStyle = "rgba(221,119,187,0.6)";
+      ctx.beginPath();
+      ctx.moveTo(ox + (trace[cur2].x + 0.5) * cell, oy + (trace[cur2].y + 0.5) * cell);
+      ctx.lineTo(fxp, fyp);
+      ctx.stroke();
+    }
+    ctx.restore();
     const dx = b[0] - a[0], dy = b[1] - a[1];
     if (dx || dy) { const tgt = Math.atan2(dy, dx), d = Math.atan2(Math.sin(tgt - angle), Math.cos(tgt - angle)); angle += d * (REDUCED ? 1 : 0.3); }
     const landed = trace[cur2].accepted;
@@ -688,6 +711,22 @@
       if (v !== "") { target[i] = Number(v); if (i < 3) document.getElementById("p" + (i + 1)).focus(); hunt(); }
     });
   });
+  // light / dark theme: cycle system -> dark -> light, remembered per viewer
+  const themeBtn = document.getElementById("theme");
+  function applyTheme(t) {
+    if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+    else document.documentElement.removeAttribute("data-theme");
+    themeBtn.textContent = t === "dark" ? "☾ dark" : t === "light" ? "☀ light" : "◐ theme";
+  }
+  let theme = "system";
+  try { theme = localStorage.getItem("fly-theme") || "system"; } catch (e) { /* private mode */ }
+  applyTheme(theme);
+  themeBtn.addEventListener("click", function () {
+    theme = theme === "system" ? "dark" : theme === "dark" ? "light" : "system";
+    applyTheme(theme);
+    try { localStorage.setItem("fly-theme", theme); } catch (e) { /* ignore */ }
+  });
+
   window.addEventListener("resize", fitCanvas);
   hunt();
   requestAnimationFrame(loop);
