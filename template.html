@@ -350,6 +350,12 @@ const DATA = __TRACE_JSON__;
   const canvas = document.getElementById("field");
   const ctx = canvas.getContext("2d");
   const HEAT = ["#0e1615", "#276f66", "#33b487", "#ecb63e", "#ff5d3b"];
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // the field never changes during a run, so draw it once on an offscreen canvas
+  // and just blit it each frame; only the fly is redrawn live
+  const fieldCanvas = document.createElement("canvas");
+  const fctx = fieldCanvas.getContext("2d");
 
   // plot geometry, filled in by fitCanvas: cell size, plot origin, scale, font
   let cell = 1, ox = 0, oy = 0, dpr = 1, fs = 11;
@@ -360,106 +366,144 @@ const DATA = __TRACE_JSON__;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.width * dpr);
+    fieldCanvas.width = canvas.width;
+    fieldCanvas.height = canvas.height;
     const padL = 36 * dpr, padR = 12 * dpr, padT = 12 * dpr;
     cell = (canvas.width - padL - padR) / G;
     ox = padL;
     oy = padT;
     fs = Math.max(9, Math.round(10.5 * dpr));
-    drawField();
+    drawFieldStatic();
   }
 
-  function drawAxes() {
+  function drawAxes(c) {
     const bottom = oy + G * cell;
-    ctx.font = fs + "px 'IBM Plex Mono', monospace";
-    ctx.fillStyle = "#6f8b83";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
+    c.font = fs + "px 'IBM Plex Mono', monospace";
+    c.fillStyle = "#6f8b83";
+    c.textAlign = "center";
+    c.textBaseline = "top";
     for (let i = 0; i <= 90; i += 10) {
-      ctx.fillText(String(i).padStart(2, "0"), ox + i * cell, bottom + 5 * dpr);
+      c.fillText(String(i).padStart(2, "0"), ox + i * cell, bottom + 5 * dpr);
     }
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
+    c.textAlign = "right";
+    c.textBaseline = "middle";
     for (let i = 0; i <= 90; i += 10) {
-      ctx.fillText(String(i).padStart(2, "0"), ox - 6 * dpr, oy + i * cell);
+      c.fillText(String(i).padStart(2, "0"), ox - 6 * dpr, oy + i * cell);
     }
-    ctx.fillStyle = "#8fb3aa";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ctx.fillText("PIN digits 1-2 →", ox + G * cell / 2, bottom + 20 * dpr);
-    ctx.save();
-    ctx.translate(ox - 26 * dpr, oy + G * cell / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.textBaseline = "alphabetic";
-    ctx.fillText("PIN digits 3-4 →", 0, 0);
-    ctx.restore();
+    c.fillStyle = "#8fb3aa";
+    c.textAlign = "center";
+    c.textBaseline = "top";
+    c.fillText("PIN digits 1-2 →", ox + G * cell / 2, bottom + 20 * dpr);
+    c.save();
+    c.translate(ox - 26 * dpr, oy + G * cell / 2);
+    c.rotate(-Math.PI / 2);
+    c.textBaseline = "alphabetic";
+    c.fillText("PIN digits 3-4 →", 0, 0);
+    c.restore();
   }
 
-  function drawField() {
-    ctx.fillStyle = "#060a09";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function drawFieldStatic() {
+    const c = fctx;
+    c.fillStyle = "#060a09";
+    c.fillRect(0, 0, fieldCanvas.width, fieldCanvas.height);
     for (let y = 0; y < G; y++) {
       const row = field[y];
       for (let x = 0; x < G; x++) {
         const k = row[x];
         if (k === 0) continue;
-        ctx.fillStyle = HEAT[k];
-        ctx.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6);
+        c.fillStyle = HEAT[k];
+        c.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6);
       }
     }
     // tens gridlines, inside the plot
-    ctx.strokeStyle = "rgba(120,160,150,0.12)";
-    ctx.lineWidth = 1;
+    c.strokeStyle = "rgba(120,160,150,0.12)";
+    c.lineWidth = 1;
     for (let i = 0; i <= G; i += 10) {
-      ctx.beginPath(); ctx.moveTo(ox + i * cell, oy); ctx.lineTo(ox + i * cell, oy + G * cell); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(ox, oy + i * cell); ctx.lineTo(ox + G * cell, oy + i * cell); ctx.stroke();
+      c.beginPath(); c.moveTo(ox + i * cell, oy); c.lineTo(ox + i * cell, oy + G * cell); c.stroke();
+      c.beginPath(); c.moveTo(ox, oy + i * cell); c.lineTo(ox + G * cell, oy + i * cell); c.stroke();
     }
     // glow and label on the source cell
     const cx = ox + (target[0] + 0.5) * cell, cy = oy + (target[1] + 0.5) * cell;
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cell * 6);
+    const grad = c.createRadialGradient(cx, cy, 0, cx, cy, cell * 6);
     grad.addColorStop(0, "rgba(255,93,59,0.55)");
     grad.addColorStop(1, "rgba(255,93,59,0)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(cx - cell * 6, cy - cell * 6, cell * 12, cell * 12);
-    ctx.fillStyle = "#ffb59e";
-    ctx.font = fs + "px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "bottom";
-    ctx.fillText("PIN " + DATA.pin, cx + cell * 1.4, cy - cell * 0.9);
-    drawAxes();
+    c.fillStyle = grad;
+    c.fillRect(cx - cell * 6, cy - cell * 6, cell * 12, cell * 12);
+    c.fillStyle = "#ffb59e";
+    c.font = fs + "px 'IBM Plex Mono', monospace";
+    c.textAlign = "left";
+    c.textBaseline = "bottom";
+    c.fillText("PIN " + DATA.pin, cx + cell * 1.4, cy - cell * 0.9);
+    drawAxes(c);
   }
 
-  const trail = [];
-  function drawFrame(i) {
-    drawField();
-    const f = trace[i];
-    // trail of recent sniffs
-    for (let t = 0; t < trail.length; t++) {
-      const p = trail[t];
-      const a = (t + 1) / (trail.length + 1) * 0.5;
-      ctx.fillStyle = "rgba(244,162,76," + a + ")";
-      const r = cell * 0.28;
+  const TAU = Math.PI * 2;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  let angle = 0;  // the fly's heading, kept between frames when it hovers
+
+  function drawScene(ts, cur, next, frac) {
+    ctx.drawImage(fieldCanvas, 0, 0);
+
+    // fading trail of the last sniffs, joined into a flight path
+    const N = 16;
+    const start = Math.max(0, cur - N);
+    ctx.lineWidth = Math.max(1, cell * 0.16);
+    ctx.lineCap = "round";
+    for (let t = start; t < cur; t++) {
+      const a = (t - start + 1) / (cur - start + 1);
+      ctx.strokeStyle = "rgba(244,162,76," + (a * 0.4) + ")";
       ctx.beginPath();
-      ctx.arc(ox + (p[0] + 0.5) * cell, oy + (p[1] + 0.5) * cell, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(ox + (trace[t].x + 0.5) * cell, oy + (trace[t].y + 0.5) * cell);
+      ctx.lineTo(ox + (trace[t + 1].x + 0.5) * cell, oy + (trace[t + 1].y + 0.5) * cell);
+      ctx.stroke();
     }
-    // the fly
-    const fx = ox + (f.x + 0.5) * cell, fy = oy + (f.y + 0.5) * cell;
+
+    const f0 = trace[cur], f1 = trace[next];
+    const fx = ox + (lerp(f0.x, f1.x, frac) + 0.5) * cell;
+    const fy = oy + (lerp(f0.y, f1.y, frac) + 0.5) * cell;
+    if (f1.x !== f0.x || f1.y !== f0.y) angle = Math.atan2(f1.y - f0.y, f1.x - f0.x);
+    drawFly(ts, fx, fy, angle, trace[cur].accepted);
+  }
+
+  function drawFly(ts, fx, fy, heading, landed) {
+    const s = Math.max(cell * 0.95, 8 * dpr);  // keep the fly visible on tiny cells
+    const col = landed ? "53,224,138" : "255,190,90";
     ctx.save();
     ctx.translate(fx, fy);
-    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, cell * 3);
-    glow.addColorStop(0, "rgba(244,162,76,0.5)");
-    glow.addColorStop(1, "rgba(244,162,76,0)");
+
+    // pulsing halo so the eye finds the fly on any background
+    const pulse = REDUCED ? 1 : 0.78 + 0.22 * Math.sin(ts / 200);
+    const gr = s * 3.6 * pulse;
+    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, gr);
+    glow.addColorStop(0, "rgba(" + col + ",0.5)");
+    glow.addColorStop(1, "rgba(" + col + ",0)");
     ctx.fillStyle = glow;
-    ctx.fillRect(-cell * 3, -cell * 3, cell * 6, cell * 6);
-    // wings
-    ctx.fillStyle = "rgba(210,235,255,0.55)";
-    ctx.beginPath(); ctx.ellipse(-cell * 0.5, -cell * 0.5, cell * 0.9, cell * 0.5, -0.7, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cell * 0.5, -cell * 0.5, cell * 0.9, cell * 0.5, 0.7, 0, Math.PI * 2); ctx.fill();
-    // body
-    ctx.fillStyle = f.accepted ? "#35e08a" : "#f4a24c";
-    ctx.beginPath(); ctx.ellipse(0, 0, cell * 0.7, cell * 1.05, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#1a1204";
-    ctx.beginPath(); ctx.arc(0, -cell * 0.7, cell * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, gr, 0, TAU); ctx.fill();
+
+    ctx.rotate(heading);
+    ctx.lineWidth = Math.max(1, s * 0.12);
+    ctx.strokeStyle = "rgba(8,12,8,0.9)";
+
+    // beating wings
+    const flap = REDUCED ? 0.6 : Math.abs(Math.sin(ts / 45));
+    const wingW = s * 0.5 * (0.45 + 0.8 * flap);
+    ctx.fillStyle = "rgba(224,242,255,0.7)";
+    ctx.beginPath(); ctx.ellipse(-s * 0.15, -s * 0.75, s * 0.95, wingW, -0.5, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-s * 0.15, s * 0.75, s * 0.95, wingW, 0.5, 0, TAU); ctx.fill();
+
+    // abdomen with a few stripes, pointing forward along +x
+    ctx.fillStyle = landed ? "#35e08a" : "#f6a94e";
+    ctx.beginPath(); ctx.ellipse(-s * 0.2, 0, s * 1.2, s * 0.75, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "rgba(24,16,6,0.45)";
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath(); ctx.ellipse(-s * 0.2 + i * s * 0.5, 0, s * 0.12, s * 0.62, 0, 0, TAU); ctx.fill();
+    }
+    // head and red eyes at the front
+    ctx.fillStyle = "#241a0a";
+    ctx.beginPath(); ctx.arc(s * 1.0, 0, s * 0.5, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ff5d3b";
+    ctx.beginPath(); ctx.arc(s * 1.2, -s * 0.22, s * 0.16, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(s * 1.2, s * 0.22, s * 0.16, 0, TAU); ctx.fill();
     ctx.restore();
   }
 
@@ -503,8 +547,8 @@ const DATA = __TRACE_JSON__;
   }
   function row(k, v) { return "<dt>" + k + "</dt><dd>" + v + "</dd>"; }
 
-  // --- playback ---
-  let idx = 0, playing = true, fps = 12, acc = 0, last = 0, done = false;
+  // --- playback: a float playhead glides between sniffs for smooth motion ---
+  let playhead = 0, playing = true, speed = 8, last = 0, done = false, lastRead = -1;
   const playBtn = document.getElementById("play");
   const speedEl = document.getElementById("speed");
   const noiseEl = document.getElementById("noise");
@@ -515,61 +559,54 @@ const DATA = __TRACE_JSON__;
     noiseVal.textContent = r.noise_ms + " ms · " + r.sniffs + " sniffs";
   }
 
-  function setFrame(i) {
-    idx = i;
-    trail.length = 0;
-    for (let t = Math.max(0, i - 14); t < i; t++) trail.push([trace[t].x, trace[t].y]);
-    drawFrame(i);
-    readout(i);
-    if (trace[i].accepted) { showFinale(); done = true; playing = false; playBtn.textContent = "Replay"; }
-  }
-
   function loop(ts) {
     if (!last) last = ts;
     const dt = ts - last; last = ts;
-    if (playing) {
-      acc += dt;
-      const step = 1000 / fps;
-      while (acc >= step && idx < trace.length - 1) {
-        acc -= step;
-        idx++;
-        trail.push([trace[idx - 1].x, trace[idx - 1].y]);
-        while (trail.length > 14) trail.shift();
-        if (idx === trace.length - 1 || trace[idx].accepted) { setFrame(idx); break; }
-      }
-      if (idx < trace.length - 1 && !done) { drawFrame(idx); readout(idx); }
+    const lastIdx = trace.length - 1;
+    if (playing && !done) {
+      playhead += dt / 1000 * speed;
+      if (playhead > lastIdx) playhead = lastIdx;
+    }
+    let cur = Math.floor(playhead);
+    if (cur > lastIdx) cur = lastIdx;
+    const next = Math.min(cur + 1, lastIdx);
+    const frac = cur >= lastIdx ? 0 : playhead - cur;
+
+    if (cur !== lastRead) { readout(cur); lastRead = cur; }
+    progressEl.style.width = (lastIdx ? playhead / lastIdx * 100 : 100) + "%";
+    drawScene(ts, cur, next, frac);
+
+    if (!done && cur === lastIdx && trace[lastIdx].accepted) {
+      showFinale(); done = true; playing = false; playBtn.textContent = "Replay";
     }
     requestAnimationFrame(loop);
   }
 
+  function reset() {
+    playhead = 0; done = false; lastRead = -1;
+    finaleEl.hidden = true;
+    playing = true; playBtn.textContent = "Pause";
+  }
   function selectRun(i) {
     runIdx = i;
     trace = runs[i].trace;
     noiseLabel();
-    done = false;
-    finaleEl.hidden = true;
-    acc = 0;
-    setFrame(0);
-    playing = true;
-    playBtn.textContent = "Pause";
+    reset();
   }
 
   playBtn.addEventListener("click", function () {
-    if (done) { selectRun(runIdx); return; }
+    if (done) { reset(); return; }
     playing = !playing;
     playBtn.textContent = playing ? "Pause" : "Play";
   });
-  document.getElementById("restart").addEventListener("click", function () {
-    selectRun(runIdx);
-  });
-  speedEl.addEventListener("input", function () { fps = Number(speedEl.value); });
+  document.getElementById("restart").addEventListener("click", reset);
+  speedEl.addEventListener("input", function () { speed = Number(speedEl.value); });
   noiseEl.addEventListener("input", function () { selectRun(Number(noiseEl.value)); });
 
   window.addEventListener("resize", fitCanvas);
   fitCanvas();
   noiseLabel();
-  setFrame(0);
-  playing = true;
+  readout(0);
   requestAnimationFrame(loop);
 })();
 </script>

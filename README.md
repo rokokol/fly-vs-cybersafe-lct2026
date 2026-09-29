@@ -31,13 +31,21 @@ Small jitter barely helps the safe. Larger jitter only makes the fly work harder
 
 ## Run it
 
+### Just watch it
+
+Open [`out/fly_safe.html`](out/fly_safe.html) in any browser — double-click the file, no build and no server needed. The page is one self-contained file with the whole hunt baked in. Drag the noise slider to see the jitter slow the fly down
+
+### Rebuild or explore
+
+Everything runs on Python 3 alone, with no packages to install
+
 ```bash
-python3 -m unittest test_oracle test_fly test_firmware   # the suite
-python3 run_demo.py --noise 20                            # hunt + decrypt with jitter, writes out/trace.json
-python3 build_html.py                                     # build the animation, writes out/fly_safe.html
+python3 -m unittest test_oracle test_fly test_firmware   # run the test suite
+python3 run_demo.py --noise 20                            # print one hunt and the decrypt result
+python3 build_html.py                                     # rebuild out/fly_safe.html from the dump
 ```
 
-Then open `out/fly_safe.html` in a browser to watch the fly hunt the PIN and the safe open, and drag the noise slider to see the jitter slow it down
+`run_demo.py` takes `--seed`, `--noise` and `--dump`; `build_html.py` rebuilds the page from a fresh set of hunts. Reopen `out/fly_safe.html` after a rebuild
 
 ## What is inside
 
@@ -48,6 +56,7 @@ Then open `out/fly_safe.html` in a browser to watch the fly hunt the PIN and the
 | `firmware.py` | the recovered PIN reference and the storage cipher |
 | `run_demo.py` | run the hunt and the decrypt, write the trace |
 | `template.html`, `build_html.py` | build the self-contained animation page |
+| `out/fly_safe.html` | the ready-to-open animation, generated and committed |
 | `data/backup_full.bin` | the 2 MiB flash dump of the safe |
 | `test_*.py` | the test suite |
 
