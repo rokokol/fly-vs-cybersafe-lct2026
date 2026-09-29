@@ -201,14 +201,43 @@
 
   let mode = "bact", target = PIN.split("").map(Number), noiseMs = 0, seed = 1337;
   let field = [], run = null, trace = [], repeats = 1;
-  let playhead = 0, playing = true, speed = 14, last = 0, done = false, lastCur = -1, angle = 0;
+  let playhead = 0, playing = true, speed = 14, last = 0, done = false, lastCur = -1, angle = 0, frameDt = 16;
   const markers = [];
+  const confetti = [];
+  let burst = false;
+  const CONFETTI_COLS = ["#DD77BB", "#BB5599", "#76C332", "#6868B4", "#FFBDE1", "#CC0C29"];
+
+  function spawnConfetti(x, y, count) {
+    const u = Math.max(cell, 9 * dpr);
+    for (let i = 0; i < (count || 90); i++) {
+      const ang = Math.random() * TAU, sp = (0.5 + Math.random()) * u * 9, life = 1.3 + Math.random() * 0.9;
+      confetti.push({
+        x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - u * 7,
+        rot: Math.random() * TAU, vrot: (Math.random() - 0.5) * 14,
+        c: CONFETTI_COLS[i % CONFETTI_COLS.length], s: Math.max(3, u * 0.7), life: life, max: life,
+      });
+    }
+  }
+  function updateConfetti() {
+    const dt = Math.min(50, frameDt) / 1000, u = Math.max(cell, 9 * dpr);
+    for (let i = confetti.length - 1; i >= 0; i--) {
+      const p = confetti[i];
+      p.vy += u * 42 * dt; p.vx *= 0.99; p.x += p.vx * dt; p.y += p.vy * dt;
+      p.rot += p.vrot * dt; p.life -= dt;
+      if (p.life <= 0) { confetti.splice(i, 1); continue; }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.max));
+      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
 
   function hunt() {
     field = FlySim.field(target);
     run = (mode === "neuro") ? FlyNeuro.huntNeuro(target, seed, noiseMs) : FlySim.hunt(target, seed, noiseMs);
     trace = run.trace; repeats = run.repeats;
-    playhead = 0; done = false; lastCur = -1; markers.length = 0; playing = true;
+    playhead = 0; done = false; lastCur = -1; markers.length = 0; confetti.length = 0; burst = false; playing = true;
     document.getElementById("play").textContent = "Pause";
     document.getElementById("finale").hidden = true;
     document.getElementById("cap-target").textContent = "source · PIN " + target.join("");
@@ -311,15 +340,11 @@
       drawCartoon(ts, Math.max(cell * 1.5, 12 * dpr), landed);
     }
     ctx.restore();
-    if (landed) {  // celebratory expanding rings instead of a flat green box
-      const base = Math.max(cell, 9 * dpr);
-      for (let r = 0; r < 3; r++) {
-        const a = ((ts / 900) + r / 3) % 1;
-        ctx.strokeStyle = "rgba(118,195,50," + (1 - a) * 0.75 + ")";
-        ctx.lineWidth = Math.max(1.5, base * 0.22);
-        ctx.beginPath(); ctx.arc(fxp, fyp, base * (0.8 + a * 4.5), 0, TAU); ctx.stroke();
-      }
+    if (landed) {  // confetti bursts from the fly on success
+      if (!burst) { spawnConfetti(fxp, fyp, 110); burst = true; }
+      if (!REDUCED && Math.random() < 0.07) spawnConfetti(fxp, fyp, 14);
     }
+    updateConfetti();
   }
 
   const tryCells = document.querySelectorAll("#try-row .digit");
@@ -357,7 +382,7 @@
   }
 
   function loop(ts) {
-    if (!last) last = ts; const dt = ts - last; last = ts; const n = trace.length - 1;
+    if (!last) last = ts; const dt = ts - last; last = ts; frameDt = dt; const n = trace.length - 1;
     if (playing && !done) { playhead += dt / 1000 * speed; if (playhead > n) playhead = n; }
     let cur = Math.min(n, Math.floor(playhead));
     if (cur !== lastCur) { for (let i = lastCur + 1; i <= cur; i++) markers.push({ x: trace[i].x, y: trace[i].y, born: ts }); readout(cur); lastCur = cur; }

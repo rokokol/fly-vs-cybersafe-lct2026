@@ -25,11 +25,16 @@ BODY_MARK = '<div class="wrap">'
 
 
 def sprite_data_uris():
-    """Return the fly-flap frames as data URIs, or [] so the cartoon is used"""
-    frames = sorted(ASSETS.glob("fly_*.png"))
-    if not frames:
-        single = ASSETS / "fly.png"
-        frames = [single] if single.exists() else []
+    """Return the fly sprite frame(s) as data URIs, or [] so the cartoon is used
+
+    The page uses the single clean sprite (fly.png); the flap frames stay on disk
+    for the README gallery
+    """
+    single = ASSETS / "fly.png"
+    if single.exists():
+        frames = [single]
+    else:
+        frames = sorted(ASSETS.glob("fly_*.png"))
     return ["data:image/png;base64," + base64.b64encode(p.read_bytes()).decode("ascii") for p in frames]
 
 

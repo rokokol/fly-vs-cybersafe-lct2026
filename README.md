@@ -2,9 +2,9 @@
 
 # Fly vs. Safe
 
-<img src="assets/fly_0.png" alt="fruit fly" height="120"/>
-<img src="assets/fly_2.png" alt="fruit fly, wings spread" height="120"/>
-<img src="assets/fly_1.png" alt="fruit fly, wings folded" height="120"/>
+<img src="assets/fly-side-a.png" alt="fruit fly, side" height="96"/>
+<img src="assets/fly_0.png" alt="fruit fly, top" height="120"/>
+<img src="assets/fly-side-c.png" alt="fruit fly, side" height="96"/>
 
 *It is well known that female Drosophila flies respond to delays with bursts of dopamine. This has let them crack USB tokens all through recorded history. This repository shows off that evolutionary adaptation, the one that keeps them fit for the modern world*
 
@@ -54,7 +54,17 @@ python3 run_demo.py --noise 20                            # print one reference 
 
 ## The fly
 
-The searcher is drawn from a real fruit-fly photo, cropped to a sprite. Credit and license are in [ASSETS.md](ASSETS.md)
+The searcher is drawn from a real fruit-fly photo, cropped to a sprite. The page uses the top-down one; the others are cut and ready to swap in
+
+<div align="center">
+<img src="assets/fly.png" alt="dorsal" height="130"/>
+&nbsp;&nbsp;
+<img src="assets/fly-side-a.png" alt="side a" height="96"/>
+<img src="assets/fly-side-b.png" alt="side b" height="96"/>
+<img src="assets/fly-side-c.png" alt="side c" height="96"/>
+</div>
+
+Every sprite is cut from a licensed Wikimedia photo — credit and license per file are in [ASSETS.md](ASSETS.md)
 
 ## What is inside
 
