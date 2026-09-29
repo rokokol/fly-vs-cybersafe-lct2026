@@ -186,6 +186,12 @@
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const HEAT = ["#241233", "#6C4681", "#BB5599", "#DD77BB", "#FFBDE1"];
 
+  // the fly is a real fruit-fly photo (head up); cartoon is the fallback
+  const flyImg = new Image();
+  let flyReady = false;
+  flyImg.onload = () => { flyReady = true; };
+  flyImg.src = "__FLY_SPRITE__";
+
   const canvas = document.getElementById("field"), ctx = canvas.getContext("2d");
   const fc = document.createElement("canvas"), fx = fc.getContext("2d");
   let cell = 1, ox = 0, oy = 0, dpr = 1, fs = 11;
@@ -291,7 +297,19 @@
     const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, gr); glow.addColorStop(0, "rgba(" + col + ",0.5)"); glow.addColorStop(1, "rgba(" + col + ",0)");
     ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, gr, 0, TAU); ctx.fill();
     ctx.rotate(angle + Math.PI / 2); if (!REDUCED) ctx.rotate(0.05 * Math.sin(ts / 70));
-    drawCartoon(ts, Math.max(cell * 1.5, 12 * dpr), landed);
+    if (flyReady) {
+      const hgt = Math.max(cell * 5.5, 46 * dpr), wdt = hgt * flyImg.width / flyImg.height;
+      const bob = REDUCED ? 1 : 1 + 0.05 * Math.sin(ts / 55);
+      ctx.drawImage(flyImg, -wdt / 2, -hgt * bob / 2, wdt, hgt * bob);
+      if (landed) {
+        ctx.globalCompositeOperation = "source-atop";
+        ctx.fillStyle = "rgba(118,195,50,0.45)";
+        ctx.fillRect(-wdt / 2, -hgt / 2, wdt, hgt);
+        ctx.globalCompositeOperation = "source-over";
+      }
+    } else {
+      drawCartoon(ts, Math.max(cell * 1.5, 12 * dpr), landed);
+    }
     ctx.restore();
   }
 

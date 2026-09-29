@@ -7,6 +7,7 @@ writes index.html (a full document for local use and GitHub Pages) and
 out/artifact.html (a bare fragment for publishing as an artifact)
 """
 import argparse
+import base64
 import json
 from pathlib import Path
 
@@ -19,7 +20,15 @@ TEMPLATE = HERE / "template.html"
 DEFAULT_DUMP = HERE / "data" / "backup_full.bin"
 INDEX_OUT = HERE / "index.html"
 ARTIFACT_OUT = HERE / "out" / "artifact.html"
+SPRITE = HERE / "assets" / "fly.png"
 BODY_MARK = '<div class="wrap">'
+
+
+def sprite_data_uri():
+    """Return the fly sprite as a data URI, or empty so the cartoon is used"""
+    if not SPRITE.exists():
+        return ""
+    return "data:image/png;base64," + base64.b64encode(SPRITE.read_bytes()).decode("ascii")
 
 
 def wrap_standalone(fragment):
@@ -43,9 +52,10 @@ def build(dump):
         .replace("__NEURO_JS__", (HERE / "fly_neuro.js").read_text())
         .replace("__DECRYPT_JSON__", json.dumps(decrypt, separators=(",", ":")))
         .replace("__STEP_MS__", str(oracle.STEP_MS))
+        .replace("__FLY_SPRITE__", sprite_data_uri())
         .replace("__PIN__", pin)
     )
-    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__"):
+    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITE__"):
         if token in fragment:
             raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)
