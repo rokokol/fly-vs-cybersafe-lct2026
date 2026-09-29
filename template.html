@@ -1,0 +1,530 @@
+<meta charset="utf-8">
+<title>Fly vs. Safe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0a0e0d;
+    --panel: #111917;
+    --panel-2: #0d1413;
+    --edge: #1e2f2b;
+    --grid: #16211f;
+    --text: #cfe8df;
+    --muted: #6f8b83;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --k0: #0e1615;
+    --k1: #14514c;
+    --k2: #1f9f78;
+    --k3: #e0ad35;
+    --k4: #ff5d3b;
+    --fly: #f4a24c;
+    --ok: #35e08a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .wrap {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100%;
+    padding: 24px 16px 40px;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+  header { margin-bottom: 18px; }
+  h1 {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(24px, 5vw, 40px);
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 .vs { color: var(--fly); }
+  .sub {
+    color: var(--muted);
+    margin: 6px 0 0;
+    max-width: 62ch;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+
+  .stage {
+    background: var(--panel-2);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .stage canvas {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 100%;
+    display: block;
+    border-radius: 6px;
+    background: #060a09;
+  }
+  .stage-cap {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .pin-row { display: flex; gap: 8px; }
+  .digit {
+    flex: 1;
+    aspect-ratio: 3 / 4;
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(22px, 6vw, 34px);
+    border-radius: 8px;
+    border: 1px solid var(--edge);
+    background: var(--panel-2);
+    color: var(--muted);
+    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+  }
+  .digit.locked {
+    color: #04140d;
+    background: var(--ok);
+    border-color: var(--ok);
+  }
+  .digit.testing {
+    color: #1a1204;
+    background: var(--k3);
+    border-color: var(--k3);
+    box-shadow: 0 0 0 3px rgba(224, 173, 53, 0.18);
+  }
+
+  .meter {
+    height: 14px;
+    border-radius: 7px;
+    background: var(--panel-2);
+    border: 1px solid var(--edge);
+    overflow: hidden;
+  }
+  .meter > span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--k1), var(--k2), var(--k3), var(--k4));
+    transition: width .15s ease;
+  }
+  .meter-cap {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 7px;
+  }
+  .meter-cap b { color: var(--text); font-weight: 600; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .stat .n {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .t {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .event { color: var(--fly); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+  .legend .item {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,.08); }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  button {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  button:hover { border-color: var(--fly); color: var(--fly); }
+  button:focus-visible { outline: 2px solid var(--fly); outline-offset: 2px; }
+  .primary { background: var(--fly); color: #1a1204; border-color: var(--fly); }
+  .primary:hover { color: #1a1204; filter: brightness(1.06); }
+  .speed { display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  input[type=range] { accent-color: var(--fly); }
+  .progress {
+    flex: 1;
+    min-width: 140px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--panel-2);
+    border: 1px solid var(--edge);
+    overflow: hidden;
+  }
+  .progress > span { display: block; height: 100%; width: 0; background: var(--fly); }
+
+  .finale { margin-top: 18px; }
+  .finale .card {
+    border-color: var(--ok);
+    box-shadow: 0 0 0 1px rgba(53, 224, 138, 0.25), 0 12px 40px rgba(53, 224, 138, 0.08);
+  }
+  .finale h2 {
+    font-family: var(--mono);
+    margin: 0 0 4px;
+    color: var(--ok);
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-family: var(--mono); font-size: 13px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; color: var(--text); font-variant-numeric: tabular-nums; word-break: break-all; }
+  .kv dd b { color: var(--ok); }
+
+  footer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 70ch;
+    border-top: 1px solid var(--edge);
+    padding-top: 14px;
+  }
+  footer b { color: var(--text); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Fly <span class="vs">vs.</span> Safe</h1>
+    <p class="sub">A fruit fly cannot reason about a PIN, but it is very good at one thing: flying up an odour gradient. The safe leaks such a gradient — it freezes 50 ms per matching leading digit. So the fly smells its way to the code by plain run-and-tumble, then the fixed key opens the data.</p>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="field" width="640" height="640" aria-label="Odour field of 10000 PIN codes with the fly"></canvas>
+      <div class="stage-cap">
+        <span>Odour field — 100 &times; 100 PINs</span>
+        <span id="cap-target">source &middot; PIN 0000</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <p class="label">PIN being sniffed</p>
+        <div class="pin-row" id="pin-row">
+          <div class="digit">0</div><div class="digit">0</div>
+          <div class="digit">0</div><div class="digit">0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="label">Smell strength — leaked freeze delay</p>
+        <div class="meter"><span id="meter-fill"></span></div>
+        <div class="meter-cap"><span>50 ms &times; matching digits</span><span><b id="freeze">0</b> ms</span></div>
+      </div>
+
+      <div class="card">
+        <p class="label">Hunt</p>
+        <div class="stats">
+          <div class="stat"><div class="n" id="s-sniff">0</div><div class="t">sniffs</div></div>
+          <div class="stat"><div class="n" id="s-best">0</div><div class="t">digits locked</div></div>
+          <div class="stat"><div class="n event" id="s-event">start</div><div class="t">move</div></div>
+          <div class="stat"><div class="n" id="s-space">10000</div><div class="t">blind space</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="label">Odour = matching prefix</p>
+        <div class="legend">
+          <span class="item"><span class="sw" style="background:var(--k0)"></span>0</span>
+          <span class="item"><span class="sw" style="background:var(--k1)"></span>1</span>
+          <span class="item"><span class="sw" style="background:var(--k2)"></span>2</span>
+          <span class="item"><span class="sw" style="background:var(--k3)"></span>3</span>
+          <span class="item"><span class="sw" style="background:var(--k4)"></span>4 &middot; source</span>
+          <span class="item"><span class="sw" style="background:var(--fly)"></span>fly</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="controls">
+    <button class="primary" id="play">Pause</button>
+    <button id="restart">Restart</button>
+    <div class="speed"><label for="noise">noise</label><input type="range" id="noise" min="0" max="3" step="1" value="0"><span id="noise-val">0 ms</span></div>
+    <div class="speed"><label for="speed">speed</label><input type="range" id="speed" min="1" max="40" value="12"></div>
+    <div class="progress"><span id="progress-fill"></span></div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <div class="card">
+      <h2 id="finale-title">SAFE OPEN</h2>
+      <p id="finale-lead">The fly landed on the code. The gate is open — now the fixed firmware key decrypts the hidden volume, offline, with no PIN at all.</p>
+      <dl class="kv" id="finale-kv"></dl>
+    </div>
+  </div>
+
+  <footer>
+    <b>Honest note.</b> This is not a brain simulation. The fly here is a plain run-and-tumble chemotaxis agent: it flies, smells the leaked delay, runs while the smell grows, and tumbles when it drops. The leak is real — the safe firmware freezes 50 ms per matching PIN digit — and that single side channel is enough for even a fly-grade searcher to win, far below the 10000 blind tries. The noise slider adds measurement jitter to that delay: watch how the fly still opens the safe but needs many more sniffs as the jitter grows, which is why noise alone is a weak defence. The PIN, the cipher key, and the decrypted volume are the real values recovered from the device.
+  </footer>
+</div>
+
+<script>
+const DATA = __TRACE_JSON__;
+
+(function () {
+  "use strict";
+  const runs = DATA.runs;
+  const field = DATA.field;
+  const G = DATA.grid;
+  const target = DATA.target_xy;
+  const STEP = DATA.step_ms;
+  const MAX_FREEZE = 4 * STEP;
+  let runIdx = 0;
+  let trace = runs[runIdx].trace;
+
+  const canvas = document.getElementById("field");
+  const ctx = canvas.getContext("2d");
+  const HEAT = ["#0e1615", "#14514c", "#1f9f78", "#e0ad35", "#ff5d3b"];
+
+  // device-pixel-aware sizing so the grid stays crisp
+  function fitCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.width * dpr);
+    drawField();
+  }
+
+  let cell = 1;
+  function drawField() {
+    cell = canvas.width / G;
+    // faint ground
+    ctx.fillStyle = "#060a09";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let y = 0; y < G; y++) {
+      const row = field[y];
+      for (let x = 0; x < G; x++) {
+        const k = row[x];
+        if (k === 0) continue;
+        ctx.fillStyle = HEAT[k];
+        ctx.fillRect(x * cell, y * cell, cell + 0.6, cell + 0.6);
+      }
+    }
+    // digit-boundary grid every 10 cells (the PIN-digit tens)
+    ctx.strokeStyle = "rgba(120,160,150,0.10)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= G; i += 10) {
+      ctx.beginPath(); ctx.moveTo(i * cell, 0); ctx.lineTo(i * cell, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * cell); ctx.lineTo(canvas.width, i * cell); ctx.stroke();
+    }
+    // glow on the source cell
+    const cx = (target[0] + 0.5) * cell, cy = (target[1] + 0.5) * cell;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cell * 6);
+    grad.addColorStop(0, "rgba(255,93,59,0.55)");
+    grad.addColorStop(1, "rgba(255,93,59,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(cx - cell * 6, cy - cell * 6, cell * 12, cell * 12);
+  }
+
+  const trail = [];
+  function drawFrame(i) {
+    drawField();
+    const f = trace[i];
+    // trail of recent sniffs
+    for (let t = 0; t < trail.length; t++) {
+      const p = trail[t];
+      const a = (t + 1) / (trail.length + 1) * 0.5;
+      ctx.fillStyle = "rgba(244,162,76," + a + ")";
+      const r = cell * 0.28;
+      ctx.beginPath();
+      ctx.arc((p[0] + 0.5) * cell, (p[1] + 0.5) * cell, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // the fly
+    const fx = (f.x + 0.5) * cell, fy = (f.y + 0.5) * cell;
+    ctx.save();
+    ctx.translate(fx, fy);
+    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, cell * 3);
+    glow.addColorStop(0, "rgba(244,162,76,0.5)");
+    glow.addColorStop(1, "rgba(244,162,76,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(-cell * 3, -cell * 3, cell * 6, cell * 6);
+    // wings
+    ctx.fillStyle = "rgba(210,235,255,0.55)";
+    ctx.beginPath(); ctx.ellipse(-cell * 0.5, -cell * 0.5, cell * 0.9, cell * 0.5, -0.7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cell * 0.5, -cell * 0.5, cell * 0.9, cell * 0.5, 0.7, 0, Math.PI * 2); ctx.fill();
+    // body
+    ctx.fillStyle = f.accepted ? "#35e08a" : "#f4a24c";
+    ctx.beginPath(); ctx.ellipse(0, 0, cell * 0.7, cell * 1.05, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#1a1204";
+    ctx.beginPath(); ctx.arc(0, -cell * 0.7, cell * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // --- readout ---
+  const pinCells = document.querySelectorAll("#pin-row .digit");
+  const meter = document.getElementById("meter-fill");
+  const freezeEl = document.getElementById("freeze");
+  const sniffEl = document.getElementById("s-sniff");
+  const bestEl = document.getElementById("s-best");
+  const eventEl = document.getElementById("s-event");
+  const progressEl = document.getElementById("progress-fill");
+  const finaleEl = document.getElementById("finale");
+  const capTarget = document.getElementById("cap-target");
+  capTarget.textContent = "source · PIN " + DATA.pin;
+
+  function readout(i) {
+    const f = trace[i];
+    for (let d = 0; d < 4; d++) {
+      const el = pinCells[d];
+      el.textContent = f.candidate[d];
+      el.className = "digit" + (d < f.best_k ? " locked" : d === f.best_k && !f.accepted ? " testing" : "");
+    }
+    const measured = f.measured_ms;
+    meter.style.width = Math.min(100, Math.max(0, measured / MAX_FREEZE * 100)) + "%";
+    freezeEl.textContent = Math.round(measured);
+    sniffEl.textContent = f.sniff;
+    bestEl.textContent = f.best_k;
+    eventEl.textContent = f.event;
+    progressEl.style.width = ((i + 1) / trace.length * 100) + "%";
+  }
+
+  function showFinale() {
+    const d = DATA.decrypt;
+    document.getElementById("finale-kv").innerHTML =
+      row("PIN found", DATA.pin + "  (in " + runs[runIdx].sniffs + " sniffs at " + runs[runIdx].noise_ms + " ms noise)") +
+      row("Storage decrypted", d.storage_bytes.toLocaleString() + " bytes") +
+      row("Boot sector", d.sector0) +
+      row("Volume", d.oem + "  ·  signature " + d.boot_sig + "  ·  FAT12") +
+      row("Prize inside", "<b>" + (d.artifact || "(none)") + "</b>");
+    finaleEl.hidden = false;
+  }
+  function row(k, v) { return "<dt>" + k + "</dt><dd>" + v + "</dd>"; }
+
+  // --- playback ---
+  let idx = 0, playing = true, fps = 12, acc = 0, last = 0, done = false;
+  const playBtn = document.getElementById("play");
+  const speedEl = document.getElementById("speed");
+  const noiseEl = document.getElementById("noise");
+  const noiseVal = document.getElementById("noise-val");
+  noiseEl.max = String(runs.length - 1);
+  function noiseLabel() {
+    const r = runs[runIdx];
+    noiseVal.textContent = r.noise_ms + " ms · " + r.sniffs + " sniffs";
+  }
+
+  function setFrame(i) {
+    idx = i;
+    trail.length = 0;
+    for (let t = Math.max(0, i - 14); t < i; t++) trail.push([trace[t].x, trace[t].y]);
+    drawFrame(i);
+    readout(i);
+    if (trace[i].accepted) { showFinale(); done = true; playing = false; playBtn.textContent = "Replay"; }
+  }
+
+  function loop(ts) {
+    if (!last) last = ts;
+    const dt = ts - last; last = ts;
+    if (playing) {
+      acc += dt;
+      const step = 1000 / fps;
+      while (acc >= step && idx < trace.length - 1) {
+        acc -= step;
+        idx++;
+        trail.push([trace[idx - 1].x, trace[idx - 1].y]);
+        while (trail.length > 14) trail.shift();
+        if (idx === trace.length - 1 || trace[idx].accepted) { setFrame(idx); break; }
+      }
+      if (idx < trace.length - 1 && !done) { drawFrame(idx); readout(idx); }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function selectRun(i) {
+    runIdx = i;
+    trace = runs[i].trace;
+    noiseLabel();
+    done = false;
+    finaleEl.hidden = true;
+    acc = 0;
+    setFrame(0);
+    playing = true;
+    playBtn.textContent = "Pause";
+  }
+
+  playBtn.addEventListener("click", function () {
+    if (done) { selectRun(runIdx); return; }
+    playing = !playing;
+    playBtn.textContent = playing ? "Pause" : "Play";
+  });
+  document.getElementById("restart").addEventListener("click", function () {
+    selectRun(runIdx);
+  });
+  speedEl.addEventListener("input", function () { fps = Number(speedEl.value); });
+  noiseEl.addEventListener("input", function () { selectRun(Number(noiseEl.value)); });
+
+  window.addEventListener("resize", fitCanvas);
+  fitCanvas();
+  noiseLabel();
+  setFrame(0);
+  playing = true;
+  requestAnimationFrame(loop);
+})();
+</script>
