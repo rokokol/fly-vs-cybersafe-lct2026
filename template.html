@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>Fly vs. Safe</title>
+<title>Fly vs. CyberSafe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -29,7 +29,9 @@
   body { margin: 0; }
   .wrap { background: var(--ground); color: var(--ink); font-family: var(--sans);
     min-height: 100%; padding: 24px 16px 40px; max-width: 1060px; margin: 0 auto; }
-  header { margin-bottom: 16px; }
+  header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .head-left { flex: 1; min-width: 0; }
+  .head-right { display: flex; gap: 8px; flex-wrap: wrap; }
   h1 { font-family: var(--mono); font-weight: 700; font-size: clamp(24px, 5vw, 40px);
     margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
   h1 .vs { color: var(--accent); }
@@ -41,6 +43,11 @@
   .hint { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 66ch; }
   .panel { display: flex; flex-direction: column; gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; }
+  .research { margin-top: 16px; }
+  .research ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .research li { font-size: 13px; line-height: 1.45; color: var(--muted); }
+  .research a { color: var(--accent); text-decoration: none; }
+  .research a:hover { text-decoration: underline; }
   .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
   .modes { display: flex; gap: 8px; }
   .modes button { flex: 1; }
@@ -71,9 +78,11 @@
   button:hover { border-color: var(--accent); color: var(--accent); }
   .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   .primary:hover { color: #fff; filter: brightness(1.05); }
-  a.ghlink { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
-    background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 16px; text-decoration: none; }
-  a.ghlink:hover { border-color: var(--accent); color: var(--accent); }
+  .iconbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--ink); background: var(--code); border: 1px solid var(--edge); border-radius: 8px;
+    padding: 8px 10px; cursor: pointer; text-decoration: none; }
+  .iconbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .iconbtn svg { width: 18px; height: 18px; display: block; }
   .ctl { display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
   .ctl input[type=range] { accent-color: var(--accent); }
   .grow { flex: 1; min-width: 130px; }
@@ -93,8 +102,16 @@
 
 <div class="wrap">
   <header>
-    <h1>Fly <span class="vs">vs.</span> Safe</h1>
-    <p class="sub">A searcher smells its way to the safe's PIN by following the leaked timing gradient — 50 ms per matching leading digit. Pick who searches, set the PIN, add measurement noise, and watch it fly.</p>
+    <div class="head-left">
+      <h1>Fly <span class="vs">vs.</span> CyberSafe</h1>
+      <p class="sub">A searcher smells its way to the safe's PIN by following the leaked timing gradient — 50 ms per matching leading digit. Pick who searches, set the PIN, add measurement noise, and watch it fly.</p>
+    </div>
+    <div class="head-right">
+      <button class="iconbtn" id="theme" aria-label="toggle light or dark theme"></button>
+      <a class="iconbtn" id="gh" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+    </div>
   </header>
 
   <main>
@@ -156,13 +173,23 @@
         </div>
       </div>
     </aside>
+
+    <section class="card research">
+      <p class="label">For the curious — research</p>
+      <ul>
+        <li>The leak: <a href="https://cwe.mitre.org/data/definitions/208.html">CWE-208 — Observable Timing Discrepancy</a></li>
+        <li>Run-and-tumble (bacterium): <a href="https://www.nature.com/articles/239500a0">Berg &amp; Brown, 1972, Nature</a></li>
+        <li>Klinokinesis (C. elegans): <a href="https://scholar.google.com/scholar?q=Pierce-Shimomura+1999+klinotaxis+klinokinesis+C+elegans">Pierce-Shimomura et al., 1999</a></li>
+        <li>Larval chemotaxis (Drosophila): <a href="https://scholar.google.com/scholar?q=Gomez-Marin+Louis+2011+Drosophila+larva+chemotaxis">Gomez-Marin &amp; Louis, 2011</a></li>
+        <li>Male fly connectome (2026): <a href="https://www.cell.com/cell/fulltext/S0092-8674(26)00942-6">MaleCNS, Cell</a> · <a href="https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/">Google Research</a></li>
+        <li>Whole-brain connectome: <a href="https://flywire.ai/">FlyWire</a></li>
+      </ul>
+    </section>
   </main>
 
   <div class="controls">
     <button class="primary" id="play">Pause</button>
     <button id="restart">New fly</button>
-    <button id="theme">◐ theme</button>
-    <a class="ghlink" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026">GitHub ↗</a>
     <div class="ctl"><label for="noise">noise</label><input type="range" id="noise" min="0" max="100" step="1" value="0"><span id="noise-val" style="min-width:38px">0 ms</span></div>
     <div class="ctl"><label for="speed">speed</label><input type="range" id="speed" min="1" max="60" value="14"></div>
     <div class="ctl grow"><div class="progress" style="width:100%"><span id="progress"></span></div></div>
@@ -445,16 +472,21 @@
   });
   // light / dark theme: cycle system -> dark -> light, remembered per viewer
   const themeBtn = document.getElementById("theme");
+  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+  const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  function effectiveDark(t) {
+    return t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
   function applyTheme(t) {
     if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
     else document.documentElement.removeAttribute("data-theme");
-    themeBtn.textContent = t === "dark" ? "☾ dark" : t === "light" ? "☀ light" : "◐ theme";
+    themeBtn.innerHTML = effectiveDark(t) ? SUN : MOON;  // show the icon of the theme you switch to
   }
   let theme = "system";
   try { theme = localStorage.getItem("fly-theme") || "system"; } catch (e) { /* private mode */ }
   applyTheme(theme);
   themeBtn.addEventListener("click", function () {
-    theme = theme === "system" ? "dark" : theme === "dark" ? "light" : "system";
+    theme = effectiveDark(theme) ? "light" : "dark";
     applyTheme(theme);
     try { localStorage.setItem("fly-theme", theme); } catch (e) { /* ignore */ }
   });

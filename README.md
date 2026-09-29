@@ -1,6 +1,6 @@
 <div align="center">
 
-# Fly vs. Safe
+# Fly vs. CyberSafe
 
 <img src="assets/fly-side-a.png" alt="fruit fly, side" height="96"/>
 <img src="assets/fly_0.png" alt="fruit fly, top" height="120"/>
