@@ -1,6 +1,18 @@
+<div align="center">
+
 # Fly vs. Safe
 
+<img src="assets/fly_0.png" alt="fruit fly" height="120"/>
+<img src="assets/fly_2.png" alt="fruit fly, wings spread" height="120"/>
+<img src="assets/fly_1.png" alt="fruit fly, wings folded" height="120"/>
+
+*It is well known that female Drosophila flies respond to delays with bursts of dopamine. This has let them crack USB tokens all through recorded history. This repository shows off that evolutionary adaptation, the one that keeps them fit for the modern world*
+
+*How do they do it? Their ultra-fine sense of smell feels the delay after a password is entered, down to the millisecond*
+
 [![assets](https://img.shields.io/badge/docs-assets-555?style=flat)](ASSETS.md)
+
+</div>
 
 An interactive page where a searcher smells its way to a safe's PIN by following the safe's own timing leak, then a fixed key decrypts the hidden volume
 

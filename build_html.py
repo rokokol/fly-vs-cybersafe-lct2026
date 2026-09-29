@@ -20,15 +20,17 @@ TEMPLATE = HERE / "template.html"
 DEFAULT_DUMP = HERE / "data" / "backup_full.bin"
 INDEX_OUT = HERE / "index.html"
 ARTIFACT_OUT = HERE / "out" / "artifact.html"
-SPRITE = HERE / "assets" / "fly.png"
+ASSETS = HERE / "assets"
 BODY_MARK = '<div class="wrap">'
 
 
-def sprite_data_uri():
-    """Return the fly sprite as a data URI, or empty so the cartoon is used"""
-    if not SPRITE.exists():
-        return ""
-    return "data:image/png;base64," + base64.b64encode(SPRITE.read_bytes()).decode("ascii")
+def sprite_data_uris():
+    """Return the fly-flap frames as data URIs, or [] so the cartoon is used"""
+    frames = sorted(ASSETS.glob("fly_*.png"))
+    if not frames:
+        single = ASSETS / "fly.png"
+        frames = [single] if single.exists() else []
+    return ["data:image/png;base64," + base64.b64encode(p.read_bytes()).decode("ascii") for p in frames]
 
 
 def wrap_standalone(fragment):
@@ -52,10 +54,10 @@ def build(dump):
         .replace("__NEURO_JS__", (HERE / "fly_neuro.js").read_text())
         .replace("__DECRYPT_JSON__", json.dumps(decrypt, separators=(",", ":")))
         .replace("__STEP_MS__", str(oracle.STEP_MS))
-        .replace("__FLY_SPRITE__", sprite_data_uri())
+        .replace("__FLY_SPRITES__", json.dumps(sprite_data_uris()))
         .replace("__PIN__", pin)
     )
-    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITE__"):
+    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__"):
         if token in fragment:
             raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)
