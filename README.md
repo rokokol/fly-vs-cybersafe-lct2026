@@ -37,6 +37,41 @@ The PIN gate and the storage cipher are independent: the PIN opens the USB gate,
 
 A real timing read carries jitter, so the page has a 0-100 ms noise slider. Under noise the searcher averages several reads per sniff, which keeps the number of moves small while the number of reads grows — noise raises the cost, it does not close the leak
 
+## How the searchers work
+
+### Bacterium
+
+A reflex: read the leaked delay, keep going while it grows, reorient when it drops. A matched leading digit is committed, so the search climbs digit by digit
+
+```mermaid
+flowchart TD
+  A[Sniff a PIN and read the freeze delay] --> B{Odour higher than last time?}
+  B -- yes --> C[Run: keep changing the same digit the same way, lock a matched digit]
+  B -- no --> D[Tumble: pick a new digit and direction]
+  C --> E{All four digits matched?}
+  D --> E
+  E -- no --> A
+  E -- yes --> F[Safe opens]
+```
+
+### Neural
+
+The same behaviour, but the run-versus-tumble choice comes from a tiny spiking circuit. The odour change drives an ON cell (rising) and an OFF cell (falling); those feed two leaky integrate-and-fire motor neurons, RUN and TUMBLE, which inhibit each other, with a small baseline drive to TUMBLE so plateaus keep it exploring. Whichever fires more spikes wins the step. It is a hand-built circuit on a real motif, not the connectome
+
+```mermaid
+flowchart LR
+  S[Odour change] --> ON[ON cell: rising]
+  S --> OFF[OFF cell: falling]
+  ON --> R[RUN neuron - LIF]
+  OFF --> T[TUMBLE neuron - LIF]
+  BASE[baseline drive] --> T
+  R <-. mutual inhibition .-> T
+  R --> DEC{More RUN or TUMBLE spikes?}
+  T --> DEC
+  DEC -- run --> KEEP[keep heading]
+  DEC -- tumble --> NEW[new heading]
+```
+
 ## Run it
 
 Open [`index.html`](index.html) in any browser — double-click it, no build and no server. Pick a searcher, set the target PIN, drag the noise, and watch the fly

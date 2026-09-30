@@ -12,7 +12,7 @@
   :root {
     --ground: #FFFFFF; --ink: #222222; --muted: #B59CA1; --edge: #FFBDE1;
     --panel: #FFF3FA; --accent: #BB5599; --accent-live: #DD77BB;
-    --ok: #76C332; --danger: #CC0C29; --code: #FFDBF0;
+    --ok: #76C332; --danger: #CC0C29; --code: #FFDBF0; --field-bg: #FFEAF6;
     --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
     color-scheme: light;
@@ -21,13 +21,13 @@
     :root:not([data-theme="light"]) {
       --ground: #222222; --ink: #FFFFFF; --muted: #B59CA1; --edge: #6C4681;
       --panel: #2b1730; --accent: #DD77BB; --accent-live: #FFBDE1;
-      --ok: #76C332; --danger: #CC0C29; --code: #361B39; color-scheme: dark;
+      --ok: #76C332; --danger: #CC0C29; --code: #361B39; --field-bg: #241233; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --ground: #222222; --ink: #FFFFFF; --muted: #B59CA1; --edge: #6C4681;
     --panel: #2b1730; --accent: #DD77BB; --accent-live: #FFBDE1;
-    --ok: #76C332; --danger: #CC0C29; --code: #361B39; color-scheme: dark;
+    --ok: #76C332; --danger: #CC0C29; --code: #361B39; --field-bg: #241233; color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body { margin: 0; }
@@ -42,12 +42,13 @@
   .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.5; font-size: 14px; }
   main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  .col-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .stage { background: var(--code); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
-  .stage canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 8px; background: #241233; }
+  .stage canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 8px; background: var(--field-bg); }
   .hint { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 66ch; }
   .panel { display: flex; flex-direction: column; gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; }
-  .research { margin-top: 16px; }
+  .research { margin-top: 0; }
   .research ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
   .research li { font-size: 13px; line-height: 1.45; color: var(--muted); }
   .research a { color: var(--accent); text-decoration: none; }
@@ -121,11 +122,25 @@
   </header>
 
   <main>
-    <section class="stage">
+    <div class="col-left">
+      <section class="stage">
       <p class="hint">Every cell is one PIN: column = first two digits, row = last two. Brighter = more leading digits correct (the leak). The searcher flies the continuous space and sniffs real PINs at the rounded cell.</p>
       <canvas id="field" width="640" height="640" aria-label="PIN odour field with the flying searcher"></canvas>
-      <div class="cap"><span>Brightness = matching leading digits</span><span id="cap-target">source · PIN 3952</span></div>
+      <div class="cap"><span>Brightness = matching leading digits</span></div>
     </section>
+
+      <section class="card research">
+        <p class="label">For the curious — the sources</p>
+        <ul>
+          <li>The leak: <a href="https://cwe.mitre.org/data/definitions/208.html">CWE-208 — Observable Timing Discrepancy</a></li>
+          <li>Run-and-tumble (bacterium): <a href="https://www.nature.com/articles/239500a0">Berg &amp; Brown, 1972, Nature</a></li>
+          <li>Klinokinesis (C. elegans): <a href="https://scholar.google.com/scholar?q=Pierce-Shimomura+1999+klinotaxis+klinokinesis+C+elegans">Pierce-Shimomura et al., 1999</a></li>
+          <li>Larval chemotaxis (Drosophila): <a href="https://scholar.google.com/scholar?q=Gomez-Marin+Louis+2011+Drosophila+larva+chemotaxis">Gomez-Marin &amp; Louis, 2011</a></li>
+          <li>Male fly connectome (2026): <a href="https://www.cell.com/cell/fulltext/S0092-8674(26)00942-6">MaleCNS, Cell</a> · <a href="https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/">Google Research</a></li>
+          <li>Whole-brain connectome: <a href="https://flywire.ai/">FlyWire</a></li>
+        </ul>
+      </section>
+    </div>
 
     <aside class="panel">
       <div class="card">
@@ -179,18 +194,6 @@
         </div>
       </div>
     </aside>
-
-    <section class="card research">
-      <p class="label">For the curious — research</p>
-      <ul>
-        <li>The leak: <a href="https://cwe.mitre.org/data/definitions/208.html">CWE-208 — Observable Timing Discrepancy</a></li>
-        <li>Run-and-tumble (bacterium): <a href="https://www.nature.com/articles/239500a0">Berg &amp; Brown, 1972, Nature</a></li>
-        <li>Klinokinesis (C. elegans): <a href="https://scholar.google.com/scholar?q=Pierce-Shimomura+1999+klinotaxis+klinokinesis+C+elegans">Pierce-Shimomura et al., 1999</a></li>
-        <li>Larval chemotaxis (Drosophila): <a href="https://scholar.google.com/scholar?q=Gomez-Marin+Louis+2011+Drosophila+larva+chemotaxis">Gomez-Marin &amp; Louis, 2011</a></li>
-        <li>Male fly connectome (2026): <a href="https://www.cell.com/cell/fulltext/S0092-8674(26)00942-6">MaleCNS, Cell</a> · <a href="https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/">Google Research</a></li>
-        <li>Whole-brain connectome: <a href="https://flywire.ai/">FlyWire</a></li>
-      </ul>
-    </section>
   </main>
 
   <div class="controls">
@@ -484,7 +487,9 @@
   const PIN = "3952", DECRYPT = {"sector0":"eb 3c 90 4d 53 44 4f 53 35 2e 30 00 02 01 04 00","oem":"MSDOS5.0","boot_sig":"55 aa","storage_bytes":720896,"is_zip":true,"root_files":["your_prize.zip"],"artifact":"your_prize.zip"}, STEP = 50;
   const MAXF = 4 * STEP, TAU = Math.PI * 2;
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const HEAT = ["#241233", "#6C4681", "#BB5599", "#DD77BB", "#FFBDE1"];
+  const HEAT_DARK = ["#241233", "#6C4681", "#BB5599", "#DD77BB", "#FFBDE1"];
+  const HEAT_LIGHT = ["#FFEAF6", "#F0B2D8", "#DD77BB", "#BB5599", "#9C1233"];
+  let darkField = true;  // set from the theme; the field palette follows it
 
   // the fly is a real fruit-fly photo (head up), a few frames cycled for a
   // wing-flap; the cartoon is the fallback until the frames decode
@@ -540,7 +545,6 @@
     playhead = 0; done = false; lastCur = -1; markers.length = 0; confetti.length = 0; burst = false; playing = true;
     document.getElementById("play").textContent = "Pause";
     document.getElementById("finale").hidden = true;
-    document.getElementById("cap-target").textContent = "source · PIN " + target.join("");
     document.getElementById("neuro-card").hidden = (mode !== "neuro");
     fitCanvas();
   }
@@ -558,11 +562,12 @@
 
   function drawField() {
     const c = fx;
-    c.fillStyle = "#1a0d26"; c.fillRect(0, 0, fc.width, fc.height);
+    const HEAT = darkField ? HEAT_DARK : HEAT_LIGHT;
+    c.fillStyle = darkField ? "#1a0d26" : "#FFF3FA"; c.fillRect(0, 0, fc.width, fc.height);
     for (let y = 0; y < 100; y++) { const row = field[y];
       for (let x = 0; x < 100; x++) { const k = row[x]; if (!k) continue;
         c.fillStyle = HEAT[k]; c.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6); } }
-    c.strokeStyle = "rgba(255,189,225,0.14)"; c.lineWidth = 1;
+    c.strokeStyle = darkField ? "rgba(255,189,225,0.14)" : "rgba(120,70,120,0.16)"; c.lineWidth = 1;
     for (let i = 0; i <= 100; i += 10) {
       c.beginPath(); c.moveTo(ox + i * cell, oy); c.lineTo(ox + i * cell, oy + 100 * cell); c.stroke();
       c.beginPath(); c.moveTo(ox, oy + i * cell); c.lineTo(ox + 100 * cell, oy + i * cell); c.stroke(); }
@@ -738,26 +743,30 @@
       if (v !== "") { target[i] = Number(v); if (i < 3) document.getElementById("p" + (i + 1)).focus(); hunt(); }
     });
   });
-  // light / dark theme: cycle system -> dark -> light, remembered per viewer
+  // theme: cycle auto -> light -> dark, auto by default, remembered per viewer
   const themeBtn = document.getElementById("theme");
   const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  function effectiveDark(t) {
-    return t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }
+  const AUTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>';
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function effectiveDark(t) { return t === "dark" || (t === "auto" && prefersDark.matches); }
   function applyTheme(t) {
     if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
     else document.documentElement.removeAttribute("data-theme");
-    themeBtn.innerHTML = effectiveDark(t) ? SUN : MOON;  // show the icon of the theme you switch to
+    themeBtn.innerHTML = t === "auto" ? AUTO : t === "dark" ? MOON : SUN;
+    themeBtn.title = "theme: " + t;
+    darkField = effectiveDark(t);
+    if (field && field.length) fitCanvas();  // repaint the field once it exists
   }
-  let theme = "system";
-  try { theme = localStorage.getItem("fly-theme") || "system"; } catch (e) { /* private mode */ }
+  let theme = "auto";
+  try { theme = localStorage.getItem("fly-theme") || "auto"; } catch (e) { /* private mode */ }
   applyTheme(theme);
   themeBtn.addEventListener("click", function () {
-    theme = effectiveDark(theme) ? "light" : "dark";
+    theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
     applyTheme(theme);
     try { localStorage.setItem("fly-theme", theme); } catch (e) { /* ignore */ }
   });
+  prefersDark.addEventListener("change", function () { if (theme === "auto") applyTheme("auto"); });
 
   window.addEventListener("resize", fitCanvas);
   hunt();
