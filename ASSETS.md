@@ -16,8 +16,8 @@ Two side sprites need their exact source confirmed — tell the maintainer which
 
 | Font | Author | License |
 | --- | --- | --- |
-| Departure Mono (`assets/DepartureMono-Regular.woff2`) | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
-| IBM Plex Mono, IBM Plex Sans, Spectral (Google Fonts) | IBM, Production Type | SIL OFL 1.1 |
+| Departure Mono (`assets/DepartureMono-Regular.woff2`) — data and title | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
+| IBM Plex Mono (UI), IBM Plex Sans (prose) — Google Fonts | IBM | SIL OFL 1.1 |
 
 Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`
 

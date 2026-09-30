@@ -2,7 +2,7 @@
 <title>Fly vs. CyberSafe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
   @font-face { font-family: "Departure Mono"; src: url("__DEPARTURE_WOFF2__") format("woff2"); font-weight: 400 700; font-display: swap; }
   /* DDLC palette (from ddlc-themes): light by default, dark under prefers/data-theme */
@@ -10,9 +10,9 @@
     --ground: #FFFFFF; --ink: #222222; --muted: #B59CA1; --edge: #FFBDE1;
     --panel: #FFF3FA; --accent: #BB5599; --accent-live: #DD77BB;
     --ok: #76C332; --danger: #CC0C29; --code: #FFDBF0; --field-bg: #FFEAF6;
-    --mono: "Departure Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
-    --serif: "Spectral", Georgia, "Times New Roman", serif;
+    --data: "Departure Mono", "IBM Plex Mono", ui-monospace, monospace;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -34,21 +34,21 @@
   header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
   .head-left { flex: 1; min-width: 0; }
   .head-right { display: flex; gap: 8px; flex-wrap: wrap; }
-  h1 { font-family: var(--mono); font-weight: 700; font-size: clamp(24px, 5vw, 40px);
+  h1 { font-family: var(--data); font-weight: 700; font-size: clamp(24px, 5vw, 40px);
     margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
   h1 .vs { color: var(--accent); }
-  .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.55; font-size: 15px; font-family: var(--serif); }
+  .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.5; font-size: 14px; }
   main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
   .col-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .stage { background: var(--code); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
   .stage canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 8px; background: var(--field-bg); }
-  .hint { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 66ch; font-family: var(--serif); }
+  .hint { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 66ch; }
   .panel { display: flex; flex-direction: column; gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; }
   .research { margin-top: 0; }
   .research ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
-  .research li { font-size: 14px; line-height: 1.5; color: var(--muted); font-family: var(--serif); }
+  .research li { font-size: 13px; line-height: 1.45; color: var(--muted); }
   .research a { color: var(--accent); text-decoration: none; }
   .research a:hover { text-decoration: underline; }
   .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
@@ -59,16 +59,17 @@
   .seg[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
   .seg[disabled] { opacity: 0.5; cursor: not-allowed; }
   .pin-row { display: flex; gap: 8px; }
-  .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--mono); font-weight: 600;
+  .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--data); font-weight: 600;
     font-size: clamp(22px, 6vw, 32px); border-radius: 8px; border: 1px solid var(--edge);
     background: var(--code); color: var(--ink); min-width: 0; padding: 0; }
   .digit.locked { background: var(--ok); border-color: var(--ok); color: #06210a; }
+  #try-row .digit { display: grid; place-items: center; line-height: 1; }
   .meter { height: 13px; border-radius: 7px; background: var(--code); border: 1px solid var(--edge); overflow: hidden; }
   .meter > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-live)); transition: width .1s; }
   .cap { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 7px; }
-  .cap b { color: var(--ink); }
+  .cap b { color: var(--ink); font-family: var(--data); }
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .stat .n { font-family: var(--mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat .n { font-family: var(--data); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .stat .t { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
   .bars { display: grid; gap: 6px; }
   .bar { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
@@ -94,11 +95,11 @@
   .finale { margin-top: 16px; }
   .finale .card { border-color: var(--ok); }
   .finale h2 { font-family: var(--mono); margin: 0 0 4px; color: var(--ok); font-size: 20px; }
-  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 14px; font-family: var(--serif); }
-  .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-family: var(--mono); font-size: 13px; }
+  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-family: var(--data); font-size: 13px; }
   .kv dt { color: var(--muted); } .kv dd { margin: 0; word-break: break-all; } .kv dd b { color: var(--ok); }
-  footer { margin-top: 22px; color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 72ch;
-    border-top: 1px solid var(--edge); padding-top: 14px; font-family: var(--serif); }
+  footer { margin-top: 22px; color: var(--muted); font-size: 12px; line-height: 1.6; max-width: 72ch;
+    border-top: 1px solid var(--edge); padding-top: 14px; }
   footer b { color: var(--ink); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -122,7 +123,6 @@
       <section class="stage">
       <p class="hint">Every cell is one PIN: column = first two digits, row = last two. Brighter = more leading digits correct (the leak). The searcher flies the continuous space and sniffs real PINs at the rounded cell.</p>
       <canvas id="field" width="640" height="640" aria-label="PIN odour field with the flying searcher"></canvas>
-      <div class="cap"><span>Brightness = matching leading digits</span></div>
     </section>
 
       <section class="card research">
