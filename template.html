@@ -2,7 +2,7 @@
 <title>Fly vs. CyberSafe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
   /* DDLC palette (from ddlc-themes): light by default, dark under prefers/data-theme */
   :root {
@@ -11,6 +11,7 @@
     --ok: #76C332; --danger: #CC0C29; --code: #FFDBF0; --field-bg: #FFEAF6;
     --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
+    --serif: "Spectral", Georgia, "Times New Roman", serif;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -35,18 +36,18 @@
   h1 { font-family: var(--mono); font-weight: 700; font-size: clamp(24px, 5vw, 40px);
     margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
   h1 .vs { color: var(--accent); }
-  .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.5; font-size: 14px; }
+  .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.55; font-size: 15px; font-family: var(--serif); }
   main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
   .col-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .stage { background: var(--code); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
   .stage canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 8px; background: var(--field-bg); }
-  .hint { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 66ch; }
+  .hint { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 66ch; font-family: var(--serif); }
   .panel { display: flex; flex-direction: column; gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; }
   .research { margin-top: 0; }
   .research ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
-  .research li { font-size: 13px; line-height: 1.45; color: var(--muted); }
+  .research li { font-size: 14px; line-height: 1.5; color: var(--muted); font-family: var(--serif); }
   .research a { color: var(--accent); text-decoration: none; }
   .research a:hover { text-decoration: underline; }
   .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
@@ -92,11 +93,11 @@
   .finale { margin-top: 16px; }
   .finale .card { border-color: var(--ok); }
   .finale h2 { font-family: var(--mono); margin: 0 0 4px; color: var(--ok); font-size: 20px; }
-  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 14px; font-family: var(--serif); }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-family: var(--mono); font-size: 13px; }
   .kv dt { color: var(--muted); } .kv dd { margin: 0; word-break: break-all; } .kv dd b { color: var(--ok); }
-  footer { margin-top: 22px; color: var(--muted); font-size: 12px; line-height: 1.6; max-width: 72ch;
-    border-top: 1px solid var(--edge); padding-top: 14px; }
+  footer { margin-top: 22px; color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 72ch;
+    border-top: 1px solid var(--edge); padding-top: 14px; font-family: var(--serif); }
   footer b { color: var(--ink); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
