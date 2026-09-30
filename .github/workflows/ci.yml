@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Python tests
+        run: python -m unittest test_oracle test_fly test_firmware
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Browser-engine tests
+        run: |
+          node test_fly_node.js
+          node test_fly_neuro_node.js
+
+      - name: Build the page
+        run: python build_html.py

@@ -10,6 +10,7 @@
 
 *How do they do it? Their ultra-fine sense of smell feels the delay after a password is entered, down to the millisecond*
 
+[![CI](https://github.com/rokokol/fly-vs-cybersafe-lct2026/actions/workflows/ci.yml/badge.svg)](https://github.com/rokokol/fly-vs-cybersafe-lct2026/actions/workflows/ci.yml)
 [![assets](https://img.shields.io/badge/docs-assets-555?style=flat)](ASSETS.md)
 
 </div>
@@ -115,6 +116,6 @@ Every sprite is cut from a licensed Wikimedia photo — credit and license per f
 
 ## Provenance
 
-The PIN, the cipher constants, and the decrypted volume are the real values recovered from the device during the LCT 2026 study
+The PIN, the cipher constants, and the decrypted volume are the real values recovered from the device during [Leaders of Digital Transformation 2026](https://i.moscow/lct), on the [Positive Technologies reverse-engineering case](https://i.moscow/lct/hackatons/08d142e7e9c74cdcbb217ab9cc54371f/)
 
 The competition is over, so these values are published here as a teaching demo
