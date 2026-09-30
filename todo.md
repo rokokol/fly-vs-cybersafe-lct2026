@@ -17,9 +17,10 @@ Tracks and ideas for Fly vs. CyberSafe, roughly in order
 
 - [ ] Enable Enforce HTTPS in Settings once the GitHub Pages DNS check passes and the certificate is issued
 - [ ] Confirm the exact source photo of the side sprites (`assets/fly-side-b.png`, `assets/fly-side-c.png`) so ASSETS.md credits each one precisely
-- [ ] Decide on a code license (add a LICENSE file); the repository is unversioned by choice
 
 ## Done
+
+- [x] MIT license (LICENSE); third-party assets keep their own licenses (ASSETS.md); the repository stays unversioned by choice
 
 - [x] Interactive page: bacterium and neural searchers, editable PIN, 0-100 ms noise with averaging, continuous flight, fading dashed trail, dissolving markers, confetti
 - [x] DDLC palette with auto, light and dark; the field follows the theme

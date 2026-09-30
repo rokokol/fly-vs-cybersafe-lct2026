@@ -11,6 +11,7 @@
 *How do they do it? Their ultra-fine sense of smell feels the delay after a password is entered, down to the millisecond*
 
 [![CI](https://github.com/rokokol/fly-vs-cybersafe-lct2026/actions/workflows/ci.yml/badge.svg)](https://github.com/rokokol/fly-vs-cybersafe-lct2026/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/code-MIT-3DA639?style=flat)](LICENSE)
 [![assets](https://img.shields.io/badge/docs-assets-555?style=flat)](ASSETS.md)
 
 </div>
