@@ -12,4 +12,13 @@ The sprites are derivative works, so the set is distributed under the strictest 
 
 Two side sprites need their exact source confirmed — tell the maintainer which linked photo each came from so this credit is precise
 
+## Fonts
+
+| Font | Author | License |
+| --- | --- | --- |
+| Departure Mono (`assets/DepartureMono-Regular.woff2`) | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
+| IBM Plex Mono, IBM Plex Sans, Spectral (Google Fonts) | IBM, Production Type | SIL OFL 1.1 |
+
+Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`
+
 Everything else in this repository is the project's own work
