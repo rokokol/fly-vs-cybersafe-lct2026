@@ -63,7 +63,7 @@
   .seg[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
   .seg[disabled] { opacity: 0.5; cursor: not-allowed; }
   .pin-row { display: flex; gap: 8px; }
-  .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--data); font-weight: 600;
+  .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--mono); font-weight: 600;
     font-size: clamp(22px, 6vw, 32px); border-radius: 8px; border: 1px solid var(--edge);
     background: var(--code); color: var(--ink); min-width: 0; padding: 0; }
   .digit.locked { background: var(--ok); border-color: var(--ok); color: #06210a; }
@@ -73,7 +73,7 @@
   .cap { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 7px; }
   .cap b { color: var(--ink); font-family: var(--data); }
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .stat .n { font-family: var(--mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat .n { font-family: var(--data); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .stat .t { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
   .bars { display: grid; gap: 6px; }
   .bar { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
