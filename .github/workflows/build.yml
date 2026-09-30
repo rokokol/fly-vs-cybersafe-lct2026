@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # The weekly vendor-sync cascade verifies its branch by calling this workflow with a ref
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: vendored copies are byte-equal to their source
+        run: ./vendor-sync.sh check
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Python tests
+        run: python -m unittest test_oracle test_fly test_firmware
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Browser-engine tests
+        run: |
+          node test_fly_node.js
+          node test_fly_neuro_node.js
+
+      # index.html is committed for GitHub Pages; it must be what the template and the
+      # vendored palette build today
+      - name: Build the page
+        run: |
+          python build_html.py
+          git diff --exit-code -- index.html

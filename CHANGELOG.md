@@ -12,3 +12,4 @@ Notable changes to Fly vs. CyberSafe. The project is unversioned, so entries are
 - README with the searcher schematics and links to the research; a For the curious card on the page
 - Python reference engine and tests, browser-engine node tests, and a CI workflow
 - Hosted on GitHub Pages at fly.rokokol.art
+- The colours come from a vendored copy of ddlc-palette, kept current by a weekly workflow, instead of values written into the page; the field, the heat map, the trail and the confetti read them too

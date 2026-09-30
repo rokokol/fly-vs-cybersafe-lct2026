@@ -21,4 +21,8 @@ Two side sprites need their exact source confirmed — tell the maintainer which
 
 Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`
 
+## Colours
+
+`assets/ddlc-palette.css` is a copy of [ddlc-palette](https://github.com/rokokol/ddlc-palette), kept byte-equal to it by `vendor-sync.sh`; the palette measures the Doki Doki Literature Club colours off [ddlc.moe](https://ddlc.moe/). Doki Doki Literature Club is the property of [Team Salvato](https://teamsalvato.com/); this project is unaffiliated with and not endorsed by Team Salvato, uses no official artwork, and follows [their IP guidelines](https://teamsalvato.com/ip-guidelines) as non-commercial fan content
+
 Everything else in this repository is the project's own work

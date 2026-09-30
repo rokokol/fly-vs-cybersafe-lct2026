@@ -32,6 +32,11 @@ def font_data_uri():
     return "data:font/woff2;base64," + base64.b64encode(f.read_bytes()).decode("ascii")
 
 
+def palette_css():
+    """Return the vendored DDLC palette, the one source of the page's colours"""
+    return (ASSETS / "ddlc-palette.css").read_text()
+
+
 def sprite_data_uris():
     """Return the fly sprite frame(s) as data URIs, or [] so the cartoon is used
 
@@ -69,9 +74,10 @@ def build(dump):
         .replace("__STEP_MS__", str(oracle.STEP_MS))
         .replace("__FLY_SPRITES__", json.dumps(sprite_data_uris()))
         .replace("__DEPARTURE_WOFF2__", font_data_uri())
+        .replace("__DDLC_PALETTE__", palette_css())
         .replace("__PIN__", pin)
     )
-    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__", "__DEPARTURE_WOFF2__"):
+    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__", "__DEPARTURE_WOFF2__", "__DDLC_PALETTE__"):
         if token in fragment:
             raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)

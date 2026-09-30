@@ -5,28 +5,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
   @font-face { font-family: "Departure Mono"; src: url("__DEPARTURE_WOFF2__") format("woff2"); font-weight: 400 700; font-display: swap; }
-  /* DDLC palette (from ddlc-themes): light by default, dark under prefers/data-theme */
+  /* The colours are assets/ddlc-palette.css, vendored from rokokol/ddlc-palette; below are
+     only their roles. Each role is written once with light-dark(): color-scheme picks the
+     side, following the system until data-theme pins one. Shades the palette lacks are
+     mixed from it. The canvas reads the --field and --heat roles too */
+  __DDLC_PALETTE__
   :root {
-    --ground: #FFFFFF; --ink: #222222; --muted: #B59CA1; --edge: #FFBDE1;
-    --panel: #FFF3FA; --accent: #BB5599; --accent-live: #DD77BB;
-    --ok: #76C332; --danger: #CC0C29; --code: #FFDBF0; --field-bg: #FFEAF6;
+    color-scheme: light dark;
+    --ground: light-dark(var(--ddlc-paper), var(--ddlc-ink));
+    --ink: light-dark(var(--ddlc-ink), var(--ddlc-paper));
+    --muted: var(--ddlc-jacket);
+    --edge: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
+    --panel: light-dark(color-mix(in srgb, var(--ddlc-dot) 33%, var(--ddlc-paper)),
+                        color-mix(in srgb, var(--ddlc-yuri-shadow) 50%, var(--ddlc-ink)));
+    --accent: light-dark(var(--ddlc-plum), var(--ddlc-pink));
+    --accent-live: light-dark(var(--ddlc-pink), var(--ddlc-blush));
+    --on-accent: var(--ddlc-paper);
+    --ok: var(--ddlc-monika-eye);
+    --on-ok: color-mix(in srgb, var(--ddlc-monika-eye) 15%, black);
+    --danger: var(--ddlc-bow);
+    --code: light-dark(var(--ddlc-dot), var(--ddlc-yuri-shadow));
+    --field-bg: light-dark(color-mix(in srgb, var(--ddlc-dot) 55%, var(--ddlc-paper)),
+                           color-mix(in srgb, var(--ddlc-yuri-shadow) 67%, black));
+    --field: light-dark(var(--panel), color-mix(in srgb, var(--ddlc-yuri-shadow) 50%, black));
+    --field-grid: light-dark(color-mix(in srgb, var(--ddlc-yuri) 16%, transparent),
+                             color-mix(in srgb, var(--ddlc-blush) 14%, transparent));
+    --heat-1: light-dark(color-mix(in srgb, var(--ddlc-blush) 70%, var(--ddlc-pink)), var(--ddlc-yuri));
+    --heat-2: light-dark(var(--ddlc-pink), var(--ddlc-plum));
+    --heat-3: light-dark(var(--ddlc-plum), var(--ddlc-pink));
+    --heat-4: light-dark(color-mix(in srgb, var(--ddlc-bow-shadow) 75%, var(--ddlc-bow)), var(--ddlc-blush));
     --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
     --data: "Departure Mono", "IBM Plex Mono", ui-monospace, monospace;
-    color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --ground: #222222; --ink: #FFFFFF; --muted: #B59CA1; --edge: #6C4681;
-      --panel: #2b1730; --accent: #DD77BB; --accent-live: #FFBDE1;
-      --ok: #76C332; --danger: #CC0C29; --code: #361B39; --field-bg: #241233; color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --ground: #222222; --ink: #FFFFFF; --muted: #B59CA1; --edge: #6C4681;
-    --panel: #2b1730; --accent: #DD77BB; --accent-live: #FFBDE1;
-    --ok: #76C332; --danger: #CC0C29; --code: #361B39; --field-bg: #241233; color-scheme: dark;
-  }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
   * { box-sizing: border-box; }
   body { margin: 0; }
   .wrap { background: var(--ground); color: var(--ink); font-family: var(--sans);
@@ -56,13 +69,13 @@
   .modes button { flex: 1; }
   .seg { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink);
     background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 8px; cursor: pointer; }
-  .seg[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .seg[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
   .seg[disabled] { opacity: 0.5; cursor: not-allowed; }
   .pin-row { display: flex; gap: 8px; }
   .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--mono); font-weight: 600;
     font-size: clamp(22px, 6vw, 32px); border-radius: 8px; border: 1px solid var(--edge);
     background: var(--code); color: var(--ink); min-width: 0; padding: 0; }
-  .digit.locked { background: var(--ok); border-color: var(--ok); color: #06210a; }
+  .digit.locked { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
   #try-row .digit { display: grid; place-items: center; line-height: 1; }
   .meter { height: 13px; border-radius: 7px; background: var(--code); border: 1px solid var(--edge); overflow: hidden; }
   .meter > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-live)); transition: width .1s; }
@@ -80,8 +93,8 @@
   button { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
     background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 16px; cursor: pointer; }
   button:hover { border-color: var(--accent); color: var(--accent); }
-  .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .primary:hover { color: #fff; filter: brightness(1.05); }
+  .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .primary:hover { color: var(--on-accent); filter: brightness(1.05); }
   .iconbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     color: var(--ink); background: var(--code); border: 1px solid var(--edge); border-radius: 8px;
     padding: 8px 10px; cursor: pointer; text-decoration: none; }
@@ -221,9 +234,25 @@
   const PIN = "__PIN__", DECRYPT = __DECRYPT_JSON__, STEP = __STEP_MS__;
   const MAXF = 4 * STEP, TAU = Math.PI * 2;
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const HEAT_DARK = ["#241233", "#6C4681", "#BB5599", "#DD77BB", "#FFBDE1"];
-  const HEAT_LIGHT = ["#FFEAF6", "#F0B2D8", "#DD77BB", "#BB5599", "#9C1233"];
-  let darkField = true;  // set from the theme; the field palette follows it
+  // The canvas takes its colours from the CSS roles and the vendored palette, resolved
+  // through a probe, since a custom property reads back as written; readColors() runs
+  // again on every theme change
+  const probe = document.createElement("span");
+  probe.hidden = true;
+  document.body.appendChild(probe);
+  function resolve(css) { probe.style.color = css; return getComputedStyle(probe).color; }
+  function rgbOf(name) { return resolve("var(" + name + ")").match(/\d+/g).slice(0, 3).join(","); }
+  let colors;
+  function readColors() {
+    colors = {
+      field: resolve("var(--field)"), grid: resolve("var(--field-grid)"), label: resolve("var(--muted)"),
+      heat: [1, 2, 3, 4].map(function (k) { return resolve("var(--heat-" + k + ")"); }),
+      bow: rgbOf("--ddlc-bow"), blush: rgbOf("--ddlc-blush"), pink: rgbOf("--ddlc-pink"), ok: rgbOf("--ddlc-monika-eye"),
+      confetti: ["--ddlc-pink", "--ddlc-plum", "--ddlc-monika-eye", "--ddlc-rule", "--ddlc-blush", "--ddlc-bow"]
+        .map(function (n) { return resolve("var(" + n + ")"); }),
+    };
+  }
+  readColors();
 
   // the fly is a real fruit-fly photo (head up), a few frames cycled for a
   // wing-flap; the cartoon is the fallback until the frames decode
@@ -244,7 +273,6 @@
   const markers = [];
   const confetti = [];
   let burst = false;
-  const CONFETTI_COLS = ["#DD77BB", "#BB5599", "#76C332", "#6868B4", "#FFBDE1", "#CC0C29"];
 
   function spawnConfetti(x, y, count) {
     const u = Math.max(cell, 9 * dpr);
@@ -253,7 +281,7 @@
       confetti.push({
         x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - u * 7,
         rot: Math.random() * TAU, vrot: (Math.random() - 0.5) * 14,
-        c: CONFETTI_COLS[i % CONFETTI_COLS.length], s: Math.max(3, u * 0.7), life: life, max: life,
+        c: colors.confetti[i % colors.confetti.length], s: Math.max(3, u * 0.7), life: life, max: life,
       });
     }
   }
@@ -296,20 +324,19 @@
 
   function drawField() {
     const c = fx;
-    const HEAT = darkField ? HEAT_DARK : HEAT_LIGHT;
-    c.fillStyle = darkField ? "#1a0d26" : "#FFF3FA"; c.fillRect(0, 0, fc.width, fc.height);
+    c.fillStyle = colors.field; c.fillRect(0, 0, fc.width, fc.height);
     for (let y = 0; y < 100; y++) { const row = field[y];
       for (let x = 0; x < 100; x++) { const k = row[x]; if (!k) continue;
-        c.fillStyle = HEAT[k]; c.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6); } }
-    c.strokeStyle = darkField ? "rgba(255,189,225,0.14)" : "rgba(120,70,120,0.16)"; c.lineWidth = 1;
+        c.fillStyle = colors.heat[k - 1]; c.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6); } }
+    c.strokeStyle = colors.grid; c.lineWidth = 1;
     for (let i = 0; i <= 100; i += 10) {
       c.beginPath(); c.moveTo(ox + i * cell, oy); c.lineTo(ox + i * cell, oy + 100 * cell); c.stroke();
       c.beginPath(); c.moveTo(ox, oy + i * cell); c.lineTo(ox + 100 * cell, oy + i * cell); c.stroke(); }
     const cx = ox + (target[0] * 10 + target[1] + 0.5) * cell, cy = oy + (target[2] * 10 + target[3] + 0.5) * cell;
     const g = c.createRadialGradient(cx, cy, 0, cx, cy, cell * 6);
-    g.addColorStop(0, "rgba(204,12,41,0.6)"); g.addColorStop(1, "rgba(204,12,41,0)");
+    g.addColorStop(0, "rgba(" + colors.bow + ",0.6)"); g.addColorStop(1, "rgba(" + colors.bow + ",0)");
     c.fillStyle = g; c.fillRect(cx - cell * 6, cy - cell * 6, cell * 12, cell * 12);
-    c.fillStyle = "#B59CA1"; c.font = fs + "px 'IBM Plex Mono', monospace";
+    c.fillStyle = colors.label; c.font = fs + "px 'IBM Plex Mono', monospace";
     c.textAlign = "center"; c.textBaseline = "top";
     for (let i = 0; i <= 90; i += 10) c.fillText(String(i).padStart(2, "0"), ox + i * cell, oy + 100 * cell + 5 * dpr);
     c.textAlign = "right"; c.textBaseline = "middle";
@@ -350,7 +377,7 @@
     // dissolving markers on chosen points
     for (let i = markers.length - 1; i >= 0; i--) {
       const m = markers[i], age = (ts - m.born) / 900; if (age >= 1) { markers.splice(i, 1); continue; }
-      ctx.strokeStyle = "rgba(255,189,225," + (1 - age) * 0.7 + ")"; ctx.lineWidth = Math.max(1, cell * 0.18);
+      ctx.strokeStyle = "rgba(" + colors.blush + "," + (1 - age) * 0.7 + ")"; ctx.lineWidth = Math.max(1, cell * 0.18);
       ctx.beginPath(); ctx.arc(ox + (m.x + 0.5) * cell, oy + (m.y + 0.5) * cell, cell * (0.4 + age * 1.6), 0, TAU); ctx.stroke();
     }
     const p = Math.min(trace.length - 1, playhead);
@@ -363,14 +390,14 @@
     const trailN = 20, tStart = Math.max(0, cur2 - trailN);
     for (let t = tStart; t < cur2; t++) {
       const al = (t - tStart + 1) / (cur2 - tStart + 1);
-      ctx.strokeStyle = "rgba(221,119,187," + (al * 0.55) + ")";
+      ctx.strokeStyle = "rgba(" + colors.pink + "," + (al * 0.55) + ")";
       ctx.beginPath();
       ctx.moveTo(ox + (trace[t].x + 0.5) * cell, oy + (trace[t].y + 0.5) * cell);
       ctx.lineTo(ox + (trace[t + 1].x + 0.5) * cell, oy + (trace[t + 1].y + 0.5) * cell);
       ctx.stroke();
     }
     if (cur2 < trace.length - 1) {
-      ctx.strokeStyle = "rgba(221,119,187,0.6)";
+      ctx.strokeStyle = "rgba(" + colors.pink + ",0.6)";
       ctx.beginPath();
       ctx.moveTo(ox + (trace[cur2].x + 0.5) * cell, oy + (trace[cur2].y + 0.5) * cell);
       ctx.lineTo(fxp, fyp);
@@ -382,7 +409,7 @@
     const landed = trace[cur2].accepted;
     ctx.save(); ctx.translate(fxp, fyp);
     const pulse = REDUCED ? 1 : 0.8 + 0.2 * Math.sin(ts / 200), gr = Math.max(cell, 9 * dpr) * 3.4 * pulse;
-    const col = landed ? "118,195,50" : "221,119,187";
+    const col = landed ? colors.ok : colors.pink;
     const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, gr); glow.addColorStop(0, "rgba(" + col + ",0.5)"); glow.addColorStop(1, "rgba(" + col + ",0)");
     ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, gr, 0, TAU); ctx.fill();
     ctx.rotate(angle + Math.PI / 2); if (!REDUCED) ctx.rotate(0.05 * Math.sin(ts / 70));
@@ -483,13 +510,12 @@
   const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   const AUTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>';
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
-  function effectiveDark(t) { return t === "dark" || (t === "auto" && prefersDark.matches); }
   function applyTheme(t) {
     if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
     else document.documentElement.removeAttribute("data-theme");
     themeBtn.innerHTML = t === "auto" ? AUTO : t === "dark" ? MOON : SUN;
     themeBtn.title = "theme: " + t;
-    darkField = effectiveDark(t);
+    readColors();
     if (field && field.length) fitCanvas();  // repaint the field once it exists
   }
   let theme = "auto";
