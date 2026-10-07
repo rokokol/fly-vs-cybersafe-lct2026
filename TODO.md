@@ -29,3 +29,4 @@ Tracks and ideas for Fly vs. CyberSafe, roughly in order
 - [x] Research links, searcher schematics, header icons, GitHub link
 - [x] Python reference engine and tests, browser-engine node tests, CI workflow, changelog
 - [x] Public repo and GitHub Pages at fly.rokokol.art
+- [x] Full-window pixel redesign after easy-bitmap: the field fills the window height, dithered glows and pointer cloud, Departure Mono interface with IBM Plex Sans prose

@@ -2,22 +2,25 @@
 <title>Fly vs. CyberSafe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap">
+<script>
+  // Pins a stored theme before the first paint; "auto" leaves data-theme unset
+  try { const t = localStorage.getItem("fly-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) { /* private mode */ }
+</script>
 <style>
-  @font-face { font-family: "Departure Mono"; src: url("__DEPARTURE_WOFF2__") format("woff2"); font-weight: 400 700; font-display: swap; }
+  @font-face { font-family: "Departure Mono"; src: url("__DEPARTURE_WOFF2__") format("woff2"); font-weight: 400; font-display: swap; }
   /* The colours are assets/ddlc-palette.css, vendored from rokokol/ddlc-palette; below are
      only their roles. Each role is written once with light-dark(): color-scheme picks the
      side, following the system until data-theme pins one. Shades the palette lacks are
-     mixed from it. The canvas reads the --field and --heat roles too */
+     mixed from it. The canvases read the --field, --heat and --cloud roles too */
   __DDLC_PALETTE__
   :root {
     color-scheme: light dark;
     --ground: light-dark(var(--ddlc-paper), var(--ddlc-ink));
     --ink: light-dark(var(--ddlc-ink), var(--ddlc-paper));
     --muted: var(--ddlc-jacket);
-    --edge: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
-    --panel: light-dark(color-mix(in srgb, var(--ddlc-dot) 33%, var(--ddlc-paper)),
-                        color-mix(in srgb, var(--ddlc-yuri-shadow) 50%, var(--ddlc-ink)));
+    --line: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
+    --panel: color-mix(in srgb, var(--ground) 92%, transparent);
     --accent: light-dark(var(--ddlc-plum), var(--ddlc-pink));
     --accent-live: light-dark(var(--ddlc-pink), var(--ddlc-blush));
     --on-accent: var(--ddlc-paper);
@@ -25,207 +28,308 @@
     --on-ok: color-mix(in srgb, var(--ddlc-monika-eye) 15%, black);
     --danger: var(--ddlc-bow);
     --code: light-dark(var(--ddlc-dot), var(--ddlc-yuri-shadow));
+    --selection: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
+    --cloud: light-dark(var(--ddlc-dot), var(--ddlc-yuri-shadow));
     --field-bg: light-dark(color-mix(in srgb, var(--ddlc-dot) 55%, var(--ddlc-paper)),
                            color-mix(in srgb, var(--ddlc-yuri-shadow) 67%, black));
-    --field: light-dark(var(--panel), color-mix(in srgb, var(--ddlc-yuri-shadow) 50%, black));
+    --field: light-dark(color-mix(in srgb, var(--ddlc-dot) 33%, var(--ddlc-paper)),
+                        color-mix(in srgb, var(--ddlc-yuri-shadow) 50%, black));
     --field-grid: light-dark(color-mix(in srgb, var(--ddlc-yuri) 16%, transparent),
                              color-mix(in srgb, var(--ddlc-blush) 14%, transparent));
     --heat-1: light-dark(color-mix(in srgb, var(--ddlc-blush) 70%, var(--ddlc-pink)), var(--ddlc-yuri));
     --heat-2: light-dark(var(--ddlc-pink), var(--ddlc-plum));
     --heat-3: light-dark(var(--ddlc-plum), var(--ddlc-pink));
     --heat-4: light-dark(color-mix(in srgb, var(--ddlc-bow-shadow) 75%, var(--ddlc-bow)), var(--ddlc-blush));
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
-    --data: "Departure Mono", "IBM Plex Mono", ui-monospace, monospace;
+    --data: "Departure Mono", ui-monospace, Menlo, monospace;
+    /* Departure Mono is drawn on an 11 px grid; whole multiples stay sharp */
+    --text: 11px;
+    --text-big: 22px;
+    --text-huge: 44px;
+    --gap: 16px;
+    /* Everything above and below the field in its column, so the field fits the window:
+       the bar, the padding, the scrubber with its caption and two lines of the status */
+    --stage-chrome: 214px;
   }
   :root[data-theme="light"] { color-scheme: light; }
   :root[data-theme="dark"] { color-scheme: dark; }
-  * { box-sizing: border-box; }
-  body { margin: 0; }
-  .wrap { background: var(--ground); color: var(--ink); font-family: var(--sans);
-    min-height: 100%; padding: 24px 16px 40px; max-width: 1060px; margin: 0 auto; }
-  header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
-  .head-left { flex: 1; min-width: 0; }
-  .head-right { display: flex; gap: 8px; flex-wrap: wrap; }
-  h1 { font-family: var(--data); font-weight: 700; font-size: clamp(24px, 5vw, 40px);
-    margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
-  h1 .vs { color: var(--accent); }
-  .sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; line-height: 1.5; font-size: 14px; }
-  main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
-  .col-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-  .stage { background: var(--code); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
-  .stage canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 8px; background: var(--field-bg); }
-  .hint { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.55; max-width: 66ch; font-family: var(--data); }
-  .panel { display: flex; flex-direction: column; gap: 12px; }
-  .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; }
-  .research { margin-top: 0; }
-  .research ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
-  .research li { font-size: 13px; line-height: 1.45; color: var(--muted); }
-  .research a { color: var(--accent); text-decoration: none; }
-  .research a:hover { text-decoration: underline; }
-  .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
-  .modes { display: flex; gap: 8px; }
-  .modes button { flex: 1; }
-  .seg { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink);
-    background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 8px; cursor: pointer; }
-  .seg[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-  .seg[disabled] { opacity: 0.5; cursor: not-allowed; }
-  .pin-row { display: flex; gap: 8px; }
-  .digit { flex: 1; aspect-ratio: 3 / 4; text-align: center; font-family: var(--mono); font-weight: 600;
-    font-size: clamp(22px, 6vw, 32px); border-radius: 8px; border: 1px solid var(--edge);
-    background: var(--code); color: var(--ink); min-width: 0; padding: 0; }
-  .digit.locked { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
-  #try-row .digit { display: grid; place-items: center; line-height: 1; }
-  .meter { height: 13px; border-radius: 7px; background: var(--code); border: 1px solid var(--edge); overflow: hidden; }
-  .meter > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-live)); transition: width .1s; }
-  .cap { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 7px; }
-  .cap b { color: var(--ink); font-family: var(--data); }
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .stat .n { font-family: var(--data); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .stat .t { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  *, *::before, *::after { box-sizing: border-box; }
+  /* Only the root has a background: a body background would paint over the cloud */
+  html { background: var(--ground); }
+  body { margin: 0; min-height: 100vh; }
+  ::selection { background: var(--selection); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  .wrap { color: var(--ink); font: var(--text) / 2 var(--data); -webkit-font-smoothing: none; font-smooth: never; }
+  a { color: var(--accent); }
+  a:hover { color: var(--accent-live); }
+  #cloud { position: fixed; inset: 0; z-index: -1; width: 100vw; height: 100vh; pointer-events: none; }
+
+  /* bar */
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px var(--gap); padding: 12px var(--gap);
+    border-bottom: 2px solid var(--line); background: var(--panel); }
+  .brand { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--text-big); font-weight: 400; line-height: 1; }
+  .brand .vs { color: var(--accent); }
+  .pixel { shape-rendering: crispEdges; fill: currentColor; }
+  .brand svg { width: 22px; height: 22px; color: var(--accent); }
+  .tagline { margin: 0; color: var(--muted); }
+  .bar-end { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .icon-button { display: grid; place-items: center; width: 33px; height: 33px; border: 2px solid transparent;
+    background: none; color: var(--ink); cursor: pointer; padding: 0; }
+  .icon-button:hover { border-color: var(--line); color: var(--accent); }
+  .icon-button svg { width: 16px; height: 16px; fill: currentColor; }
+
+  /* layout */
+  .work { display: grid; gap: var(--gap); padding: var(--gap); align-items: start;
+    grid-template-columns: 264px minmax(0, 1fr) minmax(300px, 340px); grid-template-areas: "tools stage panel"; }
+  .tools { grid-area: tools; display: flex; flex-direction: column; gap: var(--gap); }
+  .stage { grid-area: stage; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+  .panel { grid-area: panel; display: flex; flex-direction: column; gap: var(--gap); }
+  @media (max-width: 1240px) {
+    .work { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); grid-template-areas: "stage panel" "tools panel"; }
+    .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: start; }
+    /* under the field, the run controls come first */
+    .tools .run { order: -1; }
+  }
+  @media (max-width: 760px) {
+    .work { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "tools" "panel"; }
+    .tools { grid-template-columns: minmax(0, 1fr); }
+    .tagline { display: none; }
+  }
+  @media (max-width: 480px) {
+    .brand svg { display: none; }
+    .bar-end { gap: 0; }
+  }
+
+  /* the field: as large as the column and the window both allow */
+  .field-box { width: min(100%, max(320px, calc(100vh - var(--stage-chrome)))); }
+  @supports (height: 100dvh) {
+    .field-box { width: min(100%, max(320px, calc(100dvh - var(--stage-chrome)))); }
+  }
+  .field-box canvas { display: block; width: 100%; aspect-ratio: 1 / 1; background: var(--field-bg);
+    outline: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--line); }
+  /* the scrubber is a transparent range input laid over the pixel progress bar; only its
+     thumb, a square key, is drawn */
+  .scrub { position: relative; margin-top: 14px; }
+  .scrub input { position: absolute; inset: -6px 0; width: 100%; height: calc(100% + 12px); margin: 0;
+    background: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
+  .scrub input::-webkit-slider-runnable-track { height: 100%; background: none; }
+  .scrub input::-moz-range-track { background: none; }
+  .scrub input::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; border: 2px solid var(--ink);
+    border-radius: 0; background: var(--ground); box-shadow: 2px 2px 0 var(--accent); }
+  .scrub input::-moz-range-thumb { width: 8px; height: 20px; border: 2px solid var(--ink); border-radius: 0;
+    background: var(--ground); box-shadow: 2px 2px 0 var(--accent); }
+  .scrub input:focus-visible { outline: none; }
+  .scrub input:focus-visible::-webkit-slider-thumb { border-color: var(--accent); }
+  .scrub input:focus-visible::-moz-range-thumb { border-color: var(--accent); }
+  .status { margin: 8px 0 0; color: var(--muted); }
+
+  /* cards */
+  .card { padding: 12px var(--gap) var(--gap); border: 2px solid var(--line); background: var(--panel); min-width: 0; }
+  .card h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--muted);
+    font-size: var(--text); font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; }
+  .card h2::before { content: ""; width: 6px; height: 6px; background: var(--accent); flex: none; }
+  .prose { font: 14px / 1.55 var(--sans); -webkit-font-smoothing: auto; }
+  .prose p { margin: 0 0 8px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose b { font-weight: 600; }
+  .note { margin: 8px 0 0; color: var(--muted); }
+
+  /* controls */
+  .modes { display: grid; gap: 4px; }
+  .tool { min-height: 33px; padding: 2px 8px; border: 2px solid var(--line); background: var(--panel);
+    color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .tool:hover { border-color: var(--accent); }
+  .tool[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--ground); }
+  .tool:disabled { opacity: 0.4; cursor: not-allowed; }
+  .button { padding: 4px 12px; border: 2px solid var(--ink); background: var(--ground); color: var(--ink);
+    font: inherit; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
+  .button:hover { border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
+  .button:active { transform: translate(2px, 2px); box-shadow: none; }
+  .button.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); box-shadow: 2px 2px 0 var(--ink); }
+  .button.primary:hover { background: var(--accent-live); border-color: var(--accent-live); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row .button { flex: 1; }
+  .knob { display: grid; gap: 2px; margin-top: 12px; }
+  .knob > span { display: flex; justify-content: space-between; color: var(--muted); }
+  .knob output { color: var(--ink); }
+  input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+
+  /* readouts: a pixel bar is a track of 6 px blocks */
+  .progress, .meter, .track { border: 2px solid var(--line); background: var(--code); overflow: hidden; }
+  .progress { height: 12px; }
+  .meter { height: 16px; margin-top: 12px; }
+  .track { height: 12px; }
+  .progress > span, .meter > span, .track > span { display: block; height: 100%; width: 0;
+    background: repeating-linear-gradient(90deg, var(--fill, var(--accent)) 0 6px, transparent 6px 8px); }
+  .meter > span { --fill: var(--accent-live); }
+  .pin-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .digit { aspect-ratio: 3 / 4; min-width: 0; padding: 0; border: 2px solid var(--line); border-radius: 0;
+    background: var(--ground); color: var(--ink); font: var(--text-huge) / 1 var(--data); text-align: center; }
+  input.digit { border-color: var(--ink); box-shadow: 3px 3px 0 var(--line); }
+  input.digit:focus { outline: none; border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); }
+  #try-row .digit { display: grid; place-items: center; background: var(--code); }
+  #try-row .digit.locked { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+  .cap { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--muted); }
+  .cap b { color: var(--ink); font-weight: 400; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px var(--gap); }
+  .stat .n { font-size: var(--text-big); line-height: 1.5; font-variant-numeric: tabular-nums; }
+  .stat .t { color: var(--muted); }
   .bars { display: grid; gap: 6px; }
-  .bar { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
-  .bar .track { height: 9px; border-radius: 5px; background: var(--code); border: 1px solid var(--edge); overflow: hidden; }
-  .bar .track > span { display: block; height: 100%; width: 0; }
-  .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px;
-    background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 12px 15px; }
-  button { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
-    background: var(--code); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 16px; cursor: pointer; }
-  button:hover { border-color: var(--accent); color: var(--accent); }
-  .primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-  .primary:hover { color: var(--on-accent); filter: brightness(1.05); }
-  .iconbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    color: var(--ink); background: var(--code); border: 1px solid var(--edge); border-radius: 8px;
-    padding: 8px 10px; cursor: pointer; text-decoration: none; }
-  .iconbtn:hover { border-color: var(--accent); color: var(--accent); }
-  .iconbtn svg { width: 18px; height: 18px; display: block; }
-  .ctl { display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
-  .ctl input[type=range] { accent-color: var(--accent); }
-  .grow { flex: 1; min-width: 130px; }
-  .progress { height: 6px; border-radius: 3px; background: var(--code); border: 1px solid var(--edge); overflow: hidden; }
-  .progress > span { display: block; height: 100%; width: 0; background: var(--accent); }
-  .finale { margin-top: 16px; }
-  .finale .card { border-color: var(--ok); }
-  .finale h2 { font-family: var(--mono); margin: 0 0 4px; color: var(--ok); font-size: 20px; }
-  .finale p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
-  .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-family: var(--data); font-size: 13px; }
-  .kv dt { color: var(--muted); } .kv dd { margin: 0; word-break: break-all; } .kv dd b { color: var(--ok); }
-  footer { margin-top: 22px; color: var(--muted); font-size: 12px; line-height: 1.6; max-width: 72ch;
-    border-top: 1px solid var(--edge); padding-top: 14px; }
-  footer b { color: var(--ink); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .bar-row { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; color: var(--muted); }
+
+  /* finale */
+  .finale { border-color: var(--ok); box-shadow: 6px 6px 0 var(--ok); }
+  .finale h2 { color: var(--ok); font-size: var(--text-big); letter-spacing: 0; text-transform: none; }
+  .finale h2::before { background: var(--ok); width: 11px; height: 11px; }
+  .finale p { margin: 0 0 8px; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; margin: 0; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; } .kv dd b { color: var(--ok); font-weight: 400; }
+
+  /* below the fold */
+  .more { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--gap);
+    padding: 0 var(--gap) calc(var(--gap) * 2); align-items: start; }
+  .sources ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .sources li { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .button:active { transform: none; } }
 </style>
 
 <div class="wrap">
-  <header>
-    <div class="head-left">
-      <h1>Fly <span class="vs">vs.</span> CyberSafe</h1>
-      <p class="sub">A searcher smells its way to the safe's PIN by following the leaked timing gradient — 50 ms per matching leading digit. Pick who searches, set the PIN, add measurement noise, and watch it fly.</p>
-    </div>
-    <div class="head-right">
-      <button class="iconbtn" id="theme" aria-label="toggle light or dark theme"></button>
-      <a class="iconbtn" id="tg" href="https://t.me/rokokoschannel" aria-label="Telegram channel">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.1 2.4.9 10.9c-1.2.5-1.2 1.3 0 1.7l5.6 1.8 2.1 6.6c.3.8.6.9 1.2.3l3-2.7 5.9 4.4c1 .6 1.8.3 2.1-1l3.7-17.9c.4-1.6-.6-2.4-1.9-1.9zM7.8 14.1l10.8-6.9c.6-.3 1-.1.6.3l-8.9 8-.4 4-2.1-5.4z"/></svg>
+  <canvas id="cloud" aria-hidden="true"></canvas>
+
+  <header class="bar">
+    <h1 class="brand">
+      <svg class="pixel" viewBox="0 0 8 8" aria-hidden="true"><path d="M2 0h1v1H2zM5 0h1v1H5zM3 1h2v1H3zM0 2h2v1H0zM3 2h2v1H3zM6 2h2v1H6zM0 3h8v1H0zM1 4h6v1H1zM2 5h4v1H2zM3 6h2v1H3z"/></svg>
+      <span>Fly <span class="vs">vs.</span> CyberSafe</span>
+    </h1>
+    <p class="tagline">a searcher smells the PIN through a timing leak</p>
+    <div class="bar-end">
+      <button class="icon-button" id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
+        <svg class="pixel" viewBox="0 0 8 8" aria-hidden="true"><path id="theme-icon" fill-rule="evenodd"/></svg>
+      </button>
+      <a class="icon-button" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026" aria-label="Source on GitHub" title="Source on GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
-      <a class="iconbtn" id="gh" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026" aria-label="GitHub repository">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      <a class="icon-button" href="https://t.me/rokokoschannel" aria-label="Telegram channel" title="Telegram channel">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M15.4 1.6.6 7.3c-.8.3-.8.9 0 1.1l3.7 1.2 1.4 4.4c.2.5.4.6.8.2l2-1.8 3.9 2.9c.7.4 1.2.2 1.4-.7l2.5-11.9c.3-1.1-.4-1.6-1.2-1.3zM5.2 9.4l7.2-4.6c.4-.2.6 0 .4.2l-5.9 5.3-.3 2.7-1.4-3.6z"/></svg>
       </a>
     </div>
   </header>
 
-  <main>
-    <div class="col-left">
-      <section class="stage">
-      <p class="hint">Every cell is one PIN: column = first two digits, row = last two. Brighter = more leading digits correct (the leak). The searcher flies the continuous space and sniffs real PINs at the rounded cell.</p>
-      <canvas id="field" width="640" height="640" aria-label="PIN odour field with the flying searcher"></canvas>
+  <main class="work">
+    <aside class="tools" aria-label="Controls">
+      <section class="card">
+        <h2>how it works</h2>
+        <div class="prose">
+          <p>The safe answers 50 ms later for every leading digit of the PIN you got right. A searcher follows that leak like a smell. Pick who searches, set the PIN, add measurement noise, and watch it fly.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>who searches</h2>
+        <div class="modes">
+          <button class="tool" id="m-bact" type="button" aria-pressed="true">bacterium · if-else</button>
+          <button class="tool" id="m-neuro" type="button" aria-pressed="false">neural · spikes</button>
+          <button class="tool" id="m-conn" type="button" disabled title="runs on a PC, see the README">connectome · PC only</button>
+        </div>
+        <p class="note" id="mode-note">Pure run-and-tumble reflex — bacterium-grade, yet the leak still lets it in.</p>
+      </section>
+
+      <section class="card run">
+        <h2>run</h2>
+        <div class="row">
+          <button class="button primary" id="play" type="button">Pause</button>
+          <button class="button" id="restart" type="button">New fly</button>
+        </div>
+        <label class="knob" for="noise">
+          <span>noise <output id="noise-val">0 ms</output></span>
+          <input type="range" id="noise" min="0" max="100" step="1" value="0">
+        </label>
+        <label class="knob" for="speed">
+          <span>speed</span>
+          <input type="range" id="speed" min="1" max="60" value="14">
+        </label>
+      </section>
+    </aside>
+
+    <section class="stage" aria-label="Field">
+      <div class="field-box">
+        <canvas id="field" width="640" height="640" aria-label="PIN odour field with the flying searcher"></canvas>
+        <div class="scrub">
+          <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+          <input type="range" id="scrub" min="0" max="1" step="any" value="0" aria-label="Rewind the hunt">
+        </div>
+        <div class="cap"><span>drag to rewind</span><span>move <b id="move-now">0</b> / <b id="move-all">0</b></span></div>
+        <p class="status">Every cell is one PIN: column = first two digits, row = last two. Brighter = more leading digits correct, which is the leak. The searcher flies the continuous space and sniffs real PINs at the rounded cell.</p>
+      </div>
     </section>
 
-      <section class="card research">
-        <p class="label">For the curious — the sources</p>
-        <ul>
-          <li>The leak: <a href="https://cwe.mitre.org/data/definitions/208.html">CWE-208 — Observable Timing Discrepancy</a></li>
-          <li>Run-and-tumble (bacterium): <a href="https://www.nature.com/articles/239500a0">Berg &amp; Brown, 1972, Nature</a></li>
-          <li>Klinokinesis (C. elegans): <a href="https://scholar.google.com/scholar?q=Pierce-Shimomura+1999+klinotaxis+klinokinesis+C+elegans">Pierce-Shimomura et al., 1999</a></li>
-          <li>Larval chemotaxis (Drosophila): <a href="https://scholar.google.com/scholar?q=Gomez-Marin+Louis+2011+Drosophila+larva+chemotaxis">Gomez-Marin &amp; Louis, 2011</a></li>
-          <li>Male fly connectome (2026): <a href="https://www.cell.com/cell/fulltext/S0092-8674(26)00942-6">MaleCNS, Cell</a> · <a href="https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/">Google Research</a></li>
-          <li>Whole-brain connectome: <a href="https://flywire.ai/">FlyWire</a></li>
-        </ul>
+    <aside class="panel" aria-label="Readouts">
+      <section class="card finale" id="finale" hidden aria-live="polite">
+        <h2 id="finale-title">SAFE OPEN</h2>
+        <p id="finale-lead"></p>
+        <dl class="kv" id="finale-kv"></dl>
       </section>
-    </div>
 
-    <aside class="panel">
-      <div class="card">
-        <p class="label">Who searches</p>
-        <div class="modes">
-          <button class="seg" id="m-bact" aria-pressed="true">Bacterium (if-else)</button>
-          <button class="seg" id="m-neuro" aria-pressed="false">Neural (spikes)</button>
-        </div>
-        <div class="modes" style="margin-top:8px">
-          <button class="seg" id="m-conn" disabled title="runs on a PC, see the README">Connectome — PC only</button>
-        </div>
-        <p class="label" id="mode-note" style="margin:10px 0 0; text-transform:none; letter-spacing:0">Pure run-and-tumble reflex — bacterium-grade, yet the leak still lets it in.</p>
-      </div>
-
-      <div class="card">
-        <p class="label">Target PIN</p>
+      <section class="card">
+        <h2>target PIN</h2>
         <div class="pin-row" id="pin-row">
-          <input class="digit" id="p0" inputmode="numeric" maxlength="1" value="3">
-          <input class="digit" id="p1" inputmode="numeric" maxlength="1" value="9">
-          <input class="digit" id="p2" inputmode="numeric" maxlength="1" value="5">
-          <input class="digit" id="p3" inputmode="numeric" maxlength="1" value="2">
+          <input class="digit" id="p0" inputmode="numeric" maxlength="1" value="3" aria-label="PIN digit 1">
+          <input class="digit" id="p1" inputmode="numeric" maxlength="1" value="9" aria-label="PIN digit 2">
+          <input class="digit" id="p2" inputmode="numeric" maxlength="1" value="5" aria-label="PIN digit 3">
+          <input class="digit" id="p3" inputmode="numeric" maxlength="1" value="2" aria-label="PIN digit 4">
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <p class="label">Currently sniffing · smell</p>
+      <section class="card">
+        <h2>sniffing now · smell</h2>
         <div class="pin-row" id="try-row">
           <div class="digit">0</div><div class="digit">0</div><div class="digit">0</div><div class="digit">0</div>
         </div>
-        <div class="meter" style="margin-top:10px"><span id="meter"></span></div>
-        <div class="cap"><span>50 ms × matching digits (noisy read)</span><span><b id="freeze">0</b> ms</span></div>
-      </div>
+        <div class="meter"><span id="meter"></span></div>
+        <div class="cap"><span>50 ms × matching digits, noisy read</span><span><b id="freeze">0</b> ms</span></div>
+      </section>
 
-      <div class="card" id="neuro-card" hidden>
-        <p class="label">Neuron activity</p>
+      <section class="card" id="neuro-card" hidden>
+        <h2>neuron activity</h2>
         <div class="bars">
-          <div class="bar"><span>odor ↑</span><div class="track"><span id="b-on" style="background:var(--ok)"></span></div></div>
-          <div class="bar"><span>odor ↓</span><div class="track"><span id="b-off" style="background:var(--danger)"></span></div></div>
-          <div class="bar"><span>RUN</span><div class="track"><span id="b-run" style="background:var(--accent-live)"></span></div></div>
-          <div class="bar"><span>TUMBLE</span><div class="track"><span id="b-tum" style="background:var(--accent)"></span></div></div>
+          <div class="bar-row"><span>odor ↑</span><div class="track"><span id="b-on" style="--fill:var(--ok)"></span></div></div>
+          <div class="bar-row"><span>odor ↓</span><div class="track"><span id="b-off" style="--fill:var(--danger)"></span></div></div>
+          <div class="bar-row"><span>RUN</span><div class="track"><span id="b-run" style="--fill:var(--accent-live)"></span></div></div>
+          <div class="bar-row"><span>TUMBLE</span><div class="track"><span id="b-tum" style="--fill:var(--accent)"></span></div></div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <p class="label">Hunt</p>
+      <section class="card">
+        <h2>hunt</h2>
         <div class="stats">
           <div class="stat"><div class="n" id="s-sniff">0</div><div class="t">sniffs (moves)</div></div>
           <div class="stat"><div class="n" id="s-meas">0</div><div class="t">reads (cost)</div></div>
           <div class="stat"><div class="n" id="s-best">0</div><div class="t">digits locked</div></div>
           <div class="stat"><div class="n" id="s-noise">0</div><div class="t">noise ms</div></div>
         </div>
-      </div>
+      </section>
     </aside>
   </main>
 
-  <div class="controls">
-    <button class="primary" id="play">Pause</button>
-    <button id="restart">New fly</button>
-    <div class="ctl"><label for="noise">noise</label><input type="range" id="noise" min="0" max="100" step="1" value="0"><span id="noise-val" style="min-width:38px">0 ms</span></div>
-    <div class="ctl"><label for="speed">speed</label><input type="range" id="speed" min="1" max="60" value="14"></div>
-    <div class="ctl grow"><div class="progress" style="width:100%"><span id="progress"></span></div></div>
-  </div>
-
-  <div class="finale" id="finale" hidden>
-    <div class="card">
-      <h2 id="finale-title">SAFE OPEN</h2>
-      <p id="finale-lead"></p>
-      <dl class="kv" id="finale-kv"></dl>
-    </div>
-  </div>
-
-  <footer>
-    <b>Honest note.</b> PIN = odour is a metaphor: the safe leaks a real gradient (50 ms per matching leading digit), and the searcher climbs it. <b>Bacterium</b> is a plain run-and-tumble reflex — even that cracks the code, and noise only makes it average more reads, not fail. <b>Neural</b> is a small spiking klinokinesis circuit, not the connectome. The full real MaleCNS 2026 connectome runs as a separate PC track (see the README). The PIN is editable here with no firmware change; the volume decrypt is real only for the device's own PIN 3952.
+  <footer class="more">
+    <section class="card sources">
+      <h2>for the curious — the sources</h2>
+      <ul class="prose">
+        <li>The leak: <a href="https://cwe.mitre.org/data/definitions/208.html">CWE-208 — Observable Timing Discrepancy</a></li>
+        <li>Run-and-tumble (bacterium): <a href="https://www.nature.com/articles/239500a0">Berg &amp; Brown, 1972, Nature</a></li>
+        <li>Klinokinesis (C. elegans): <a href="https://scholar.google.com/scholar?q=Pierce-Shimomura+1999+klinotaxis+klinokinesis+C+elegans">Pierce-Shimomura et al., 1999</a></li>
+        <li>Larval chemotaxis (Drosophila): <a href="https://scholar.google.com/scholar?q=Gomez-Marin+Louis+2011+Drosophila+larva+chemotaxis">Gomez-Marin &amp; Louis, 2011</a></li>
+        <li>Male fly connectome (2026): <a href="https://www.cell.com/cell/fulltext/S0092-8674(26)00942-6">MaleCNS, Cell</a> · <a href="https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/">Google Research</a></li>
+        <li>Whole-brain connectome: <a href="https://flywire.ai/">FlyWire</a></li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>honest note</h2>
+      <div class="prose">
+        <p>PIN = odour is a metaphor: the safe leaks a real gradient (50 ms per matching leading digit), and the searcher climbs it. <b>Bacterium</b> is a plain run-and-tumble reflex — even that cracks the code, and noise only makes it average more reads, not fail. <b>Neural</b> is a small spiking klinokinesis circuit, not the connectome. The full real MaleCNS 2026 connectome runs as a separate PC track (see the README). The PIN is editable here with no firmware change; the volume decrypt is real only for the device's own PIN 3952.</p>
+      </div>
+    </section>
   </footer>
 </div>
 
@@ -249,6 +353,7 @@
   function readColors() {
     colors = {
       field: resolve("var(--field)"), grid: resolve("var(--field-grid)"), label: resolve("var(--muted)"),
+      cloud: resolve("var(--cloud)"),
       heat: [1, 2, 3, 4].map(function (k) { return resolve("var(--heat-" + k + ")"); }),
       bow: rgbOf("--ddlc-bow"), blush: rgbOf("--ddlc-blush"), pink: rgbOf("--ddlc-pink"), ok: rgbOf("--ddlc-monika-eye"),
       confetti: ["--ddlc-pink", "--ddlc-plum", "--ddlc-monika-eye", "--ddlc-rule", "--ddlc-blush", "--ddlc-bow"]
@@ -256,6 +361,42 @@
     };
   }
   readColors();
+
+  // Glows fade out by ordered dithering, as in easy-bitmap: a lattice cell is lit when the
+  // density at its distance beats that cell's threshold in an 8x8 Bayer matrix
+  function bayer(n) {
+    if (n === 1) return [[0]];
+    const m = bayer(n / 2), h = n / 2, out = [];
+    for (let y = 0; y < n; y++) out.push(new Array(n));
+    for (let y = 0; y < h; y++) for (let x = 0; x < h; x++) {
+      const v = 4 * m[y][x];
+      out[y][x] = v; out[y][x + h] = v + 2; out[y + h][x] = v + 3; out[y + h][x + h] = v + 1;
+    }
+    return out;
+  }
+  const BAYER = bayer(8).map(function (row) { return row.map(function (v) { return (v + 0.5) / 64; }); });
+  // Lights the cells of a lattice with pitch `p` and origin (x0, y0) inside a disc of
+  // radius r; the density is peak * (1 - (d / r)^2). A phase shifts the Bayer matrix
+  // across the lattice, so the same disc lights a different set of cells
+  function ditherDisc(c, x0, y0, p, cx, cy, r, peak, fill, phase) {
+    const ph = phase || 0;
+    if (r <= 0) return;
+    const gap = Math.max(1, Math.round(p / 4));
+    c.fillStyle = fill;
+    const i0 = Math.floor((cx - r - x0) / p), i1 = Math.ceil((cx + r - x0) / p);
+    const j0 = Math.floor((cy - r - y0) / p), j1 = Math.ceil((cy + r - y0) / p);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const dx = x0 + (i + 0.5) * p - cx, dy = y0 + (j + 0.5) * p - cy;
+      const density = peak * (1 - (dx * dx + dy * dy) / (r * r));
+      if (density > BAYER[(j + ph) & 7][(i + 3 * ph) & 7]) snapRect(c, x0 + i * p, y0 + j * p, p - gap, p - gap);
+    }
+  }
+  // Fills a rectangle with its edges rounded to whole pixels: a fractional pitch then
+  // gives cells one pixel apart in size instead of blurred edges
+  function snapRect(c, x, y, w, h) {
+    const x0 = Math.round(x), y0 = Math.round(y);
+    c.fillRect(x0, y0, Math.round(x + w) - x0, Math.round(y + h) - y0);
+  }
 
   // the fly is a real fruit-fly photo (head up), a few frames cycled for a
   // wing-flap; the cartoon is the fallback until the frames decode
@@ -268,7 +409,8 @@
 
   const canvas = document.getElementById("field"), ctx = canvas.getContext("2d");
   const fc = document.createElement("canvas"), fx = fc.getContext("2d");
-  let cell = 1, ox = 0, oy = 0, dpr = 1, fs = 11;
+  // lat is the dithering pitch, half a cell
+  let cell = 1, lat = 1, ox = 0, oy = 0, dpr = 1, fs = 11;
 
   let mode = "bact", target = PIN.split("").map(Number), noiseMs = 0, seed = 1337;
   let field = [], run = null, trace = [], repeats = 1;
@@ -284,10 +426,12 @@
       confetti.push({
         x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - u * 7,
         rot: Math.random() * TAU, vrot: (Math.random() - 0.5) * 14,
-        c: colors.confetti[i % colors.confetti.length], s: Math.max(3, u * 0.7), life: life, max: life,
+        c: colors.confetti[i % colors.confetti.length], life: life, max: life,
       });
     }
   }
+  // Confetti stays on the dithering lattice; the spin shows as a flake that narrows to
+  // one lattice cell and widens again
   function updateConfetti() {
     const dt = Math.min(50, frameDt) / 1000, u = Math.max(cell, 9 * dpr);
     for (let i = confetti.length - 1; i >= 0; i--) {
@@ -295,10 +439,10 @@
       p.vy += u * 42 * dt; p.vx *= 0.99; p.x += p.vx * dt; p.y += p.vy * dt;
       p.rot += p.vrot * dt; p.life -= dt;
       if (p.life <= 0) { confetti.splice(i, 1); continue; }
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      const w = lat * (1 + Math.round(Math.abs(Math.cos(p.rot)))), h = lat * 2;
+      const px = ox + Math.round((p.x - ox) / lat) * lat, py = oy + Math.round((p.y - oy) / lat) * lat;
       ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.max));
-      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
-      ctx.restore();
+      ctx.fillStyle = p.c; snapRect(ctx, px - w / 2, py - h / 2, w, h);
     }
     ctx.globalAlpha = 1;
   }
@@ -311,8 +455,38 @@
     document.getElementById("play").textContent = "Pause";
     document.getElementById("finale").hidden = true;
     document.getElementById("neuro-card").hidden = (mode !== "neuro");
+    scrub.max = trace.length - 1;
+    document.getElementById("move-all").textContent = trace.length - 1;
     fitCanvas();
   }
+
+  // Rewinding moves the playhead and lets the loop redraw that moment: the next frame
+  // takes one readout and one marker, and a rewind from the end takes the finale back
+  const scrub = document.getElementById("scrub");
+  let dragging = false, playingBeforeDrag = false;
+  function seek(p) {
+    const n = trace.length - 1;
+    playhead = Math.max(0, Math.min(n, p));
+    markers.length = 0;
+    lastCur = Math.floor(playhead) - 1;
+    if (done && playhead < n) {
+      done = false; burst = false; confetti.length = 0;
+      document.getElementById("finale").hidden = true;
+      document.getElementById("play").textContent = playing ? "Pause" : "Play";
+    }
+  }
+  scrub.addEventListener("pointerdown", function () {
+    dragging = true; playingBeforeDrag = playing; playing = false;
+  });
+  scrub.addEventListener("input", function () { seek(Number(this.value)); });
+  // a range input fires no change event when released unmoved, so the drag ends on the window
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false; playing = playingBeforeDrag && !done;
+    if (!done) document.getElementById("play").textContent = playing ? "Pause" : "Play";
+  }
+  addEventListener("pointerup", endDrag);
+  addEventListener("pointercancel", endDrag);
 
   function fitCanvas() {
     const rect = canvas.getBoundingClientRect();
@@ -320,28 +494,27 @@
     canvas.width = canvas.height = Math.round(rect.width * dpr);
     fc.width = canvas.width; fc.height = canvas.height;
     const padL = 36 * dpr, padR = 12 * dpr, padT = 12 * dpr;
-    cell = (canvas.width - padL - padR) / 100; ox = padL; oy = padT;
-    fs = Math.max(9, Math.round(10.5 * dpr));
+    cell = (canvas.width - padL - padR) / 100; lat = cell / 2; ox = padL; oy = padT;
+    fs = 11 * Math.max(1, Math.round(dpr));
     drawField();
   }
 
   function drawField() {
     const c = fx;
     c.fillStyle = colors.field; c.fillRect(0, 0, fc.width, fc.height);
+    // each cell edge is rounded once from its index, so neighbours share it exactly
+    const ex = [], ey = [];
+    for (let i = 0; i <= 100; i++) { ex.push(Math.round(ox + i * cell)); ey.push(Math.round(oy + i * cell)); }
     for (let y = 0; y < 100; y++) { const row = field[y];
       for (let x = 0; x < 100; x++) { const k = row[x]; if (!k) continue;
-        c.fillStyle = colors.heat[k - 1]; c.fillRect(ox + x * cell, oy + y * cell, cell + 0.6, cell + 0.6); } }
-    c.strokeStyle = colors.grid; c.lineWidth = 1;
+        c.fillStyle = colors.heat[k - 1]; c.fillRect(ex[x], ey[y], ex[x + 1] - ex[x], ey[y + 1] - ey[y]); } }
+    c.fillStyle = colors.grid;
     for (let i = 0; i <= 100; i += 10) {
-      c.beginPath(); c.moveTo(ox + i * cell, oy); c.lineTo(ox + i * cell, oy + 100 * cell); c.stroke();
-      c.beginPath(); c.moveTo(ox, oy + i * cell); c.lineTo(ox + 100 * cell, oy + i * cell); c.stroke(); }
-    const cx = ox + (target[0] * 10 + target[1] + 0.5) * cell, cy = oy + (target[2] * 10 + target[3] + 0.5) * cell;
-    const g = c.createRadialGradient(cx, cy, 0, cx, cy, cell * 6);
-    g.addColorStop(0, "rgba(" + colors.bow + ",0.6)"); g.addColorStop(1, "rgba(" + colors.bow + ",0)");
-    c.fillStyle = g; c.fillRect(cx - cell * 6, cy - cell * 6, cell * 12, cell * 12);
-    c.fillStyle = colors.label; c.font = fs + "px 'IBM Plex Mono', monospace";
+      c.fillRect(ex[i], ey[0], 1, ey[100] - ey[0]);
+      c.fillRect(ex[0], ey[i], ex[100] - ex[0], 1); }
+    c.fillStyle = colors.label; c.font = fs + "px 'Departure Mono', monospace";
     c.textAlign = "center"; c.textBaseline = "top";
-    for (let i = 0; i <= 90; i += 10) c.fillText(String(i).padStart(2, "0"), ox + i * cell, oy + 100 * cell + 5 * dpr);
+    for (let i = 0; i <= 90; i += 10) c.fillText(String(i).padStart(2, "0"), ox + i * cell, oy + 100 * cell + 6 * dpr);
     c.textAlign = "right"; c.textBaseline = "middle";
     for (let i = 0; i <= 90; i += 10) c.fillText(String(i).padStart(2, "0"), ox - 6 * dpr, oy + i * cell);
   }
@@ -375,13 +548,28 @@
       ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.beginPath(); ctx.arc(s * u * 0.3, -u * 1.45, u * 0.12, 0, TAU); ctx.fill(); }
   }
 
+  // The target is a small odour cloud: it breathes, drifts within half a cell of the
+  // target cell, and its pixels shimmer as the Bayer phase steps; the cell itself stays put
+  function drawTarget(ts) {
+    const tx = ox + (target[0] * 10 + target[1] + 0.5) * cell, ty = oy + (target[2] * 10 + target[3] + 0.5) * cell;
+    const still = REDUCED ? 0 : 1;
+    const cx = tx + still * 0.5 * cell * Math.cos(ts / 900), cy = ty + still * 0.5 * cell * Math.sin(ts / 1300);
+    const r = cell * (2.8 + still * 0.6 * Math.sin(ts / 350));
+    ditherDisc(ctx, ox, oy, lat, cx, cy, r, 1, "rgba(" + colors.bow + ",0.8)", still * Math.floor(ts / 140));
+    ctx.fillStyle = "rgb(" + colors.bow + ")";
+    snapRect(ctx, tx - cell / 2, ty - cell / 2, cell, cell);
+  }
+
   function scene(ts, cur) {
     ctx.drawImage(fc, 0, 0);
-    // dissolving markers on chosen points
+    drawTarget(ts);
+    // dissolving square rings on chosen points
     for (let i = markers.length - 1; i >= 0; i--) {
       const m = markers[i], age = (ts - m.born) / 900; if (age >= 1) { markers.splice(i, 1); continue; }
-      ctx.strokeStyle = "rgba(" + colors.blush + "," + (1 - age) * 0.7 + ")"; ctx.lineWidth = Math.max(1, cell * 0.18);
-      ctx.beginPath(); ctx.arc(ox + (m.x + 0.5) * cell, oy + (m.y + 0.5) * cell, cell * (0.4 + age * 1.6), 0, TAU); ctx.stroke();
+      const half = Math.round(cell * (0.5 + age * 1.6)), mx = ox + Math.round((m.x + 0.5) * cell), my = oy + Math.round((m.y + 0.5) * cell);
+      const lw = Math.max(1, Math.round(cell / 4));
+      ctx.strokeStyle = "rgba(" + colors.blush + "," + (1 - age) * 0.7 + ")"; ctx.lineWidth = lw;
+      ctx.strokeRect(mx - half, my - half, half * 2, half * 2);
     }
     const p = Math.min(trace.length - 1, playhead);
     const cur2 = Math.floor(p), a = posAt(p), b = posAt(Math.min(trace.length - 1, p + 0.05));
@@ -410,11 +598,10 @@
     const dx = b[0] - a[0], dy = b[1] - a[1];
     if (dx || dy) { const tgt = Math.atan2(dy, dx), d = Math.atan2(Math.sin(tgt - angle), Math.cos(tgt - angle)); angle += d * (REDUCED ? 1 : 0.3); }
     const landed = trace[cur2].accepted;
-    ctx.save(); ctx.translate(fxp, fyp);
+    // the halo stays on the field's lattice while the fly moves over it
     const pulse = REDUCED ? 1 : 0.8 + 0.2 * Math.sin(ts / 200), gr = Math.max(cell, 9 * dpr) * 3.4 * pulse;
-    const col = landed ? colors.ok : colors.pink;
-    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, gr); glow.addColorStop(0, "rgba(" + col + ",0.5)"); glow.addColorStop(1, "rgba(" + col + ",0)");
-    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, gr, 0, TAU); ctx.fill();
+    ditherDisc(ctx, ox, oy, lat, fxp, fyp, gr, 0.75, "rgba(" + (landed ? colors.ok : colors.pink) + ",0.6)");
+    ctx.save(); ctx.translate(fxp, fyp);
     ctx.rotate(angle + Math.PI / 2); if (!REDUCED) ctx.rotate(0.05 * Math.sin(ts / 70));
     const img = flyFrame(ts);
     if (img) {
@@ -474,10 +661,50 @@
     let cur = Math.min(n, Math.floor(playhead));
     if (cur !== lastCur) { for (let i = lastCur + 1; i <= cur; i++) markers.push({ x: trace[i].x, y: trace[i].y, born: ts }); readout(cur); lastCur = cur; }
     document.getElementById("progress").style.width = (n ? playhead / n * 100 : 100) + "%";
+    if (!dragging) scrub.value = playhead;
+    document.getElementById("move-now").textContent = cur;
     scene(ts, cur);
     if (!done && cur === n && trace[n].accepted) { finale(); done = true; playing = false; document.getElementById("play").textContent = "Replay"; }
     requestAnimationFrame(loop);
   }
+
+  // The background: a dithered ball on a 6 px lattice that trails the pointer on a spring,
+  // after easy-bitmap's cloud. It draws only while something moves, and never under
+  // prefers-reduced-motion
+  const cloud = (function () {
+    const cv = document.getElementById("cloud"), c = cv.getContext("2d");
+    const CELL = 6, RADIUS = 150, STIFFNESS = 0.08, DAMPING = 0.72;
+    const goal = { x: innerWidth / 2, y: innerHeight / 2 }, centre = { x: goal.x, y: goal.y }, vel = { x: 0, y: 0 };
+    let size = 0, shown = false, frame = 0;
+    function draw() {
+      c.clearRect(0, 0, innerWidth, innerHeight);
+      if (size >= 0.02) ditherDisc(c, 0, 0, CELL, centre.x, centre.y, RADIUS * size, 1, colors.cloud);
+    }
+    function resize() {
+      const r = window.devicePixelRatio || 1;
+      cv.width = Math.round(innerWidth * r); cv.height = Math.round(innerHeight * r);
+      c.setTransform(r, 0, 0, r, 0, 0);
+      draw();
+    }
+    function step() {
+      vel.x = (vel.x + (goal.x - centre.x) * STIFFNESS) * DAMPING;
+      vel.y = (vel.y + (goal.y - centre.y) * STIFFNESS) * DAMPING;
+      centre.x += vel.x; centre.y += vel.y;
+      size += ((shown ? 1 : 0) - size) * 0.12;
+      draw();
+      const moving = Math.abs(vel.x) + Math.abs(vel.y) > 0.05 || Math.abs((shown ? 1 : 0) - size) > 0.01;
+      frame = moving && !document.hidden ? requestAnimationFrame(step) : 0;
+    }
+    function kick() { if (!REDUCED && !frame) frame = requestAnimationFrame(step); }
+    function follow(e) { goal.x = e.clientX; goal.y = e.clientY; shown = true; kick(); }
+    addEventListener("pointermove", function (e) { if (e.pointerType !== "touch" || e.buttons) follow(e); });
+    addEventListener("pointerdown", follow);
+    addEventListener("pointerup", function (e) { if (e.pointerType === "touch") { shown = false; kick(); } });
+    document.documentElement.addEventListener("pointerleave", function () { shown = false; kick(); });
+    addEventListener("resize", resize);
+    resize();
+    return { recolor: draw };
+  })();
 
   // controls
   function setMode(m) {
@@ -507,31 +734,42 @@
       if (v !== "") { target[i] = Number(v); if (i < 3) document.getElementById("p" + (i + 1)).focus(); hunt(); }
     });
   });
-  // theme: cycle auto -> light -> dark, auto by default, remembered per viewer
-  const themeBtn = document.getElementById("theme");
-  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
-  const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  const AUTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>';
+  // theme: cycle auto -> light -> dark, auto by default, remembered per viewer; the
+  // 8x8 pixel icons (a monitor, a sun, a moon) are easy-bitmap's
+  const themeBtn = document.getElementById("theme"), themeIcon = document.getElementById("theme-icon");
+  const ICONS = {
+    auto: "M0 1h8v5H0zM1 2v3h6V2zM3 6h2v1H3zM2 7h4v1H2z",
+    light: "M3 0h2v1H3zM3 7h2v1H3zM0 3h1v2H0zM7 3h1v2H7zM2 2h4v4H2zM1 1h1v1H1zM6 1h1v1H6zM1 6h1v1H1zM6 6h1v1H6z",
+    dark: "M2 0h3v1H2zM1 1h2v1H1zM0 2h2v4H0zM1 6h2v1H1zM2 7h4v1H2zM5 6h2v1H5zM6 5h2v1H6z",
+  };
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function repaint() {
+    readColors();
+    cloud.recolor();
+    if (field && field.length) fitCanvas();  // repaint the field once it exists
+  }
   function applyTheme(t) {
     if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
     else document.documentElement.removeAttribute("data-theme");
-    themeBtn.innerHTML = t === "auto" ? AUTO : t === "dark" ? MOON : SUN;
-    themeBtn.title = "theme: " + t;
-    readColors();
-    if (field && field.length) fitCanvas();  // repaint the field once it exists
+    themeIcon.setAttribute("d", ICONS[t]);
+    themeBtn.title = "Theme: " + t;
+    themeBtn.setAttribute("aria-label", "Theme: " + t);
+    repaint();
   }
   let theme = "auto";
   try { theme = localStorage.getItem("fly-theme") || "auto"; } catch (e) { /* private mode */ }
+  if (!ICONS[theme]) theme = "auto";
   applyTheme(theme);
   themeBtn.addEventListener("click", function () {
     theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
     applyTheme(theme);
     try { localStorage.setItem("fly-theme", theme); } catch (e) { /* ignore */ }
   });
-  prefersDark.addEventListener("change", function () { if (theme === "auto") applyTheme("auto"); });
+  prefersDark.addEventListener("change", function () { if (theme === "auto") repaint(); });
 
   window.addEventListener("resize", fitCanvas);
+  // the axis labels use Departure Mono, so the field is drawn again once it has loaded
+  if (document.fonts) document.fonts.ready.then(fitCanvas);
   hunt();
   requestAnimationFrame(loop);
 })();

@@ -2,6 +2,16 @@
 
 Notable changes to Fly vs. CyberSafe. The project is unversioned, so entries are grouped by date, newest first
 
+## 2026-10-07
+
+- The page is a full-window app in the pixel style of easy-bitmap: a header bar, square cards with hard shadows, controls on the left and readouts on the right
+- The field grows with the window, up to its full height
+- Glows and confetti on the field are dithered pixels, and a dithered cloud follows the pointer in the background
+- Departure Mono is the interface font; IBM Plex Sans stays for prose, and IBM Plex Mono is gone
+- Pixel icons for the theme switch and the title
+- The progress bar under the field is a scrubber: drag it to rewind or skip the hunt, with a move counter beside it
+- The target mark is smaller and alive: a dithered odour cloud that breathes, drifts and shimmers around the target cell
+
 ## 2026-09-30
 
 - Initial public release

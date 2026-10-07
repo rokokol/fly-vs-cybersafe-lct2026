@@ -16,13 +16,17 @@ Two side sprites need their exact source confirmed — tell the maintainer which
 
 | Font | Author | License |
 | --- | --- | --- |
-| Departure Mono (`assets/DepartureMono-Regular.woff2`) — data and title | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
-| IBM Plex Mono (UI), IBM Plex Sans (prose) — Google Fonts | IBM | SIL OFL 1.1 |
+| Departure Mono (`assets/DepartureMono-Regular.woff2`) — the interface and the data | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
+| IBM Plex Sans (prose) — Google Fonts | IBM | SIL OFL 1.1 |
 
 Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`
 
 ## Colours
 
 `assets/ddlc-palette.css` is a copy of [ddlc-palette](https://github.com/rokokol/ddlc-palette), kept byte-equal to it by `vendor-sync.sh`; the palette measures the Doki Doki Literature Club colours off [ddlc.moe](https://ddlc.moe/). Doki Doki Literature Club is the property of [Team Salvato](https://teamsalvato.com/); this project is unaffiliated with and not endorsed by Team Salvato, uses no official artwork, and follows [their IP guidelines](https://teamsalvato.com/ip-guidelines) as non-commercial fan content
+
+## Pixel style
+
+The 8×8 theme icons, the GitHub and Telegram icons and the dithered pointer cloud come from [easy-bitmap](https://github.com/rokokol/easy-bitmap), a sibling project by the same author under the MIT license
 
 Everything else in this repository is the project's own work
