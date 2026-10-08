@@ -4,32 +4,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap">
 <script>
-  // Pins a stored theme before the first paint; "auto" leaves data-theme unset
+  // Pins a stored theme before the first paint; "system" leaves data-theme unset
   try { const t = localStorage.getItem("fly-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) { /* private mode */ }
 </script>
 <style>
-  @font-face { font-family: "Departure Mono"; src: url("__DEPARTURE_WOFF2__") format("woff2"); font-weight: 400; font-display: swap; }
-  /* The colours are assets/ddlc-palette.css, vendored from rokokol/ddlc-palette; below are
-     only their roles. Each role is written once with light-dark(): color-scheme picks the
-     side, following the system until data-theme pins one. Shades the palette lacks are
-     mixed from it. The canvases read the --field, --heat and --cloud roles too */
-  __DDLC_PALETTE__
+  __DDLC_UI__
+  /* The page's own rules on top of the DDLC web kit, assets/ddlc-ui.css vendored from
+     rokokol/ddlc-themes: the palette, the colour roles, the bar, the cards and the controls
+     come from there. Below are the field's own roles, each written once with light-dark(),
+     and shades the palette lacks are mixed from it. The canvases read them too */
   :root {
-    color-scheme: light dark;
-    --ground: light-dark(var(--ddlc-paper), var(--ddlc-ink));
-    --ink: light-dark(var(--ddlc-ink), var(--ddlc-paper));
-    --muted: var(--ddlc-jacket);
-    --line: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
-    --panel: color-mix(in srgb, var(--ground) 92%, transparent);
-    --accent: light-dark(var(--ddlc-plum), var(--ddlc-pink));
-    --accent-live: light-dark(var(--ddlc-pink), var(--ddlc-blush));
-    --on-accent: var(--ddlc-paper);
-    --ok: var(--ddlc-monika-eye);
     --on-ok: color-mix(in srgb, var(--ddlc-monika-eye) 15%, black);
-    --danger: var(--ddlc-bow);
-    --code: light-dark(var(--ddlc-dot), var(--ddlc-yuri-shadow));
-    --selection: light-dark(var(--ddlc-blush), var(--ddlc-yuri));
-    --cloud: light-dark(var(--ddlc-dot), var(--ddlc-yuri-shadow));
     --field-bg: light-dark(color-mix(in srgb, var(--ddlc-dot) 55%, var(--ddlc-paper)),
                            color-mix(in srgb, var(--ddlc-yuri-shadow) 67%, black));
     --field: light-dark(color-mix(in srgb, var(--ddlc-dot) 33%, var(--ddlc-paper)),
@@ -40,66 +25,19 @@
     --heat-2: light-dark(var(--ddlc-pink), var(--ddlc-plum));
     --heat-3: light-dark(var(--ddlc-plum), var(--ddlc-pink));
     --heat-4: light-dark(color-mix(in srgb, var(--ddlc-bow-shadow) 75%, var(--ddlc-bow)), var(--ddlc-blush));
-    --sans: "IBM Plex Sans", system-ui, sans-serif;
-    --data: "Departure Mono", ui-monospace, Menlo, monospace;
-    /* Departure Mono is drawn on an 11 px grid; whole multiples stay sharp */
-    --text: 11px;
-    --text-big: 22px;
-    --text-huge: 44px;
-    --gap: 16px;
+    /* The long text reads in Plex, loaded above; the kit's sans is the fallback */
+    --ddlc-font-sans: "IBM Plex Sans", system-ui, sans-serif;
     /* Everything above and below the field in its column, so the field fits the window:
        the bar, the padding, the scrubber with its caption and two lines of the status */
     --stage-chrome: 214px;
   }
-  :root[data-theme="light"] { color-scheme: light; }
-  :root[data-theme="dark"] { color-scheme: dark; }
-  *, *::before, *::after { box-sizing: border-box; }
-  /* Only the root has a background: a body background would paint over the cloud */
-  html { background: var(--ground); }
-  body { margin: 0; min-height: 100vh; }
-  ::selection { background: var(--selection); }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  [hidden] { display: none !important; }
-  .wrap { color: var(--ink); font: var(--text) / 2 var(--data); -webkit-font-smoothing: none; font-smooth: never; }
-  a { color: var(--accent); }
-  a:hover { color: var(--accent-live); }
-  #cloud { position: fixed; inset: 0; z-index: -1; width: 100vw; height: 100vh; pointer-events: none; }
-
-  /* bar */
-  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px var(--gap); padding: 12px var(--gap);
-    border-bottom: 2px solid var(--line); background: var(--panel); }
-  .brand { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--text-big); font-weight: 400; line-height: 1; }
-  .brand .vs { color: var(--accent); }
-  .pixel { shape-rendering: crispEdges; fill: currentColor; }
-  .brand svg { width: 22px; height: 22px; color: var(--accent); }
-  .tagline { margin: 0; color: var(--muted); }
-  .bar-end { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  .icon-button { display: grid; place-items: center; width: 33px; height: 33px; border: 2px solid transparent;
-    background: none; color: var(--ink); cursor: pointer; padding: 0; }
-  .icon-button:hover { border-color: var(--line); color: var(--accent); }
-  .icon-button svg { width: 16px; height: 16px; fill: currentColor; }
-
-  /* layout */
-  .work { display: grid; gap: var(--gap); padding: var(--gap); align-items: start;
-    grid-template-columns: 264px minmax(0, 1fr) minmax(300px, 340px); grid-template-areas: "tools stage panel"; }
-  .tools { grid-area: tools; display: flex; flex-direction: column; gap: var(--gap); }
-  .stage { grid-area: stage; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
-  .panel { grid-area: panel; display: flex; flex-direction: column; gap: var(--gap); }
   @media (max-width: 1240px) {
-    .work { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); grid-template-areas: "stage panel" "tools panel"; }
-    .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: start; }
+    :root { --ddlc-panel-width: minmax(280px, 320px); }
     /* under the field, the run controls come first */
     .tools .run { order: -1; }
   }
-  @media (max-width: 760px) {
-    .work { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "tools" "panel"; }
-    .tools { grid-template-columns: minmax(0, 1fr); }
-    .tagline { display: none; }
-  }
-  @media (max-width: 480px) {
-    .brand svg { display: none; }
-    .bar-end { gap: 0; }
-  }
+
+  .brand .vs { color: var(--ddlc-accent); }
 
   /* the field: as large as the column and the window both allow */
   .field-box { width: min(100%, max(320px, calc(100vh - var(--stage-chrome)))); }
@@ -107,7 +45,7 @@
     .field-box { width: min(100%, max(320px, calc(100dvh - var(--stage-chrome)))); }
   }
   .field-box canvas { display: block; width: 100%; aspect-ratio: 1 / 1; background: var(--field-bg);
-    outline: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--line); }
+    outline: 2px solid var(--ddlc-text); box-shadow: 6px 6px 0 var(--ddlc-line); }
   /* the scrubber is a transparent range input laid over the pixel progress bar; only its
      thumb, a square key, is drawn */
   .scrub { position: relative; margin-top: 14px; }
@@ -115,87 +53,50 @@
     background: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
   .scrub input::-webkit-slider-runnable-track { height: 100%; background: none; }
   .scrub input::-moz-range-track { background: none; }
-  .scrub input::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; border: 2px solid var(--ink);
-    border-radius: 0; background: var(--ground); box-shadow: 2px 2px 0 var(--accent); }
-  .scrub input::-moz-range-thumb { width: 8px; height: 20px; border: 2px solid var(--ink); border-radius: 0;
-    background: var(--ground); box-shadow: 2px 2px 0 var(--accent); }
+  .scrub input::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; border: 2px solid var(--ddlc-text);
+    border-radius: 0; background: var(--ddlc-ground); box-shadow: 2px 2px 0 var(--ddlc-accent); }
+  .scrub input::-moz-range-thumb { width: 8px; height: 20px; border: 2px solid var(--ddlc-text); border-radius: 0;
+    background: var(--ddlc-ground); box-shadow: 2px 2px 0 var(--ddlc-accent); }
   .scrub input:focus-visible { outline: none; }
-  .scrub input:focus-visible::-webkit-slider-thumb { border-color: var(--accent); }
-  .scrub input:focus-visible::-moz-range-thumb { border-color: var(--accent); }
-  .status { margin: 8px 0 0; color: var(--muted); }
+  .scrub input:focus-visible::-webkit-slider-thumb { border-color: var(--ddlc-accent); }
+  .scrub input:focus-visible::-moz-range-thumb { border-color: var(--ddlc-accent); }
+  .status { margin: 8px 0 0; }
 
-  /* cards */
-  .card { padding: 12px var(--gap) var(--gap); border: 2px solid var(--line); background: var(--panel); min-width: 0; }
-  .card h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--muted);
-    font-size: var(--text); font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; }
-  .card h2::before { content: ""; width: 6px; height: 6px; background: var(--accent); flex: none; }
-  .prose { font: 14px / 1.55 var(--sans); -webkit-font-smoothing: auto; }
-  .prose p { margin: 0 0 8px; }
-  .prose p:last-child { margin-bottom: 0; }
   .prose b { font-weight: 600; }
-  .note { margin: 8px 0 0; color: var(--muted); }
 
   /* controls */
   .modes { display: grid; gap: 4px; }
-  .tool { min-height: 33px; padding: 2px 8px; border: 2px solid var(--line); background: var(--panel);
-    color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
-  .tool:hover { border-color: var(--accent); }
-  .tool[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--ground); }
-  .tool:disabled { opacity: 0.4; cursor: not-allowed; }
-  .button { padding: 4px 12px; border: 2px solid var(--ink); background: var(--ground); color: var(--ink);
-    font: inherit; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
-  .button:hover { border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
-  .button:active { transform: translate(2px, 2px); box-shadow: none; }
-  .button.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); box-shadow: 2px 2px 0 var(--ink); }
-  .button.primary:hover { background: var(--accent-live); border-color: var(--accent-live); }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .row .button { flex: 1; }
   .knob { display: grid; gap: 2px; margin-top: 12px; }
-  .knob > span { display: flex; justify-content: space-between; color: var(--muted); }
-  .knob output { color: var(--ink); }
-  input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .knob > span { display: flex; justify-content: space-between; color: var(--ddlc-muted); }
+  .knob output { color: var(--ddlc-text); }
 
-  /* readouts: a pixel bar is a track of 6 px blocks */
-  .progress, .meter, .track { border: 2px solid var(--line); background: var(--code); overflow: hidden; }
-  .progress { height: 12px; }
+  /* readouts: the kit's pixel bar, in three heights */
+  .progress, .track { height: 12px; overflow: hidden; border: 2px solid var(--ddlc-line); background: var(--ddlc-code-ground); }
+  .progress > span, .track > span { display: block; height: 100%; width: 0;
+    background: repeating-linear-gradient(90deg, var(--fill, var(--ddlc-accent)) 0 6px, transparent 6px 8px); }
   .meter { height: 16px; margin-top: 12px; }
-  .track { height: 12px; }
-  .progress > span, .meter > span, .track > span { display: block; height: 100%; width: 0;
-    background: repeating-linear-gradient(90deg, var(--fill, var(--accent)) 0 6px, transparent 6px 8px); }
-  .meter > span { --fill: var(--accent-live); }
+  .meter > span { --fill: var(--ddlc-accent-live); }
   .pin-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  .digit { aspect-ratio: 3 / 4; min-width: 0; padding: 0; border: 2px solid var(--line); border-radius: 0;
-    background: var(--ground); color: var(--ink); font: var(--text-huge) / 1 var(--data); text-align: center; }
-  input.digit { border-color: var(--ink); box-shadow: 3px 3px 0 var(--line); }
-  input.digit:focus { outline: none; border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); }
-  #try-row .digit { display: grid; place-items: center; background: var(--code); }
-  #try-row .digit.locked { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
-  .cap { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--muted); }
-  .cap b { color: var(--ink); font-weight: 400; }
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px var(--gap); }
-  .stat .n { font-size: var(--text-big); line-height: 1.5; font-variant-numeric: tabular-nums; }
-  .stat .t { color: var(--muted); }
+  .digit { aspect-ratio: 3 / 4; min-width: 0; padding: 0; border: 2px solid var(--ddlc-line); border-radius: 0;
+    background: var(--ddlc-ground); color: var(--ddlc-text); font: var(--ddlc-size-huge) / 1 var(--ddlc-font-data); text-align: center; }
+  input.digit { border-color: var(--ddlc-text); box-shadow: 3px 3px 0 var(--ddlc-line); }
+  input.digit:focus { outline: none; border-color: var(--ddlc-accent); box-shadow: 3px 3px 0 var(--ddlc-accent); }
+  #try-row .digit { display: grid; place-items: center; background: var(--ddlc-code-ground); }
+  #try-row .digit.locked { background: var(--ddlc-ok); border-color: var(--ddlc-ok); color: var(--on-ok); }
   .bars { display: grid; gap: 6px; }
-  .bar-row { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; color: var(--muted); }
+  .bar-row { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; color: var(--ddlc-muted); }
 
-  /* finale */
-  .finale { border-color: var(--ok); box-shadow: 6px 6px 0 var(--ok); }
-  .finale h2 { color: var(--ok); font-size: var(--text-big); letter-spacing: 0; text-transform: none; }
-  .finale h2::before { background: var(--ok); width: 11px; height: 11px; }
-  .finale p { margin: 0 0 8px; color: var(--muted); }
-  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; margin: 0; }
-  .kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; } .kv dd b { color: var(--ok); font-weight: 400; }
+  /* the finale is the kit's done card */
+  .card.done p { margin: 0 0 8px; color: var(--ddlc-muted); }
+  .kv dd b { color: var(--ddlc-ok); font-weight: 400; }
 
   /* below the fold */
-  .more { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--gap);
-    padding: 0 var(--gap) calc(var(--gap) * 2); align-items: start; }
   .sources ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
-  .sources li { color: var(--muted); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .button:active { transform: none; } }
+  .sources li { color: var(--ddlc-muted); }
 </style>
 
 <div class="wrap">
-  <canvas id="cloud" aria-hidden="true"></canvas>
+  <canvas class="cloud" id="cloud" aria-hidden="true"></canvas>
 
   <header class="bar">
     <h1 class="brand">
@@ -204,7 +105,7 @@
     </h1>
     <p class="tagline">a searcher smells the PIN through a timing leak</p>
     <div class="bar-end">
-      <button class="icon-button" id="theme" type="button" aria-label="Theme: auto" title="Theme: auto">
+      <button class="icon-button" id="theme" type="button" aria-label="Theme: system" title="Theme: system">
         <svg class="pixel" viewBox="0 0 8 8" aria-hidden="true"><path id="theme-icon" fill-rule="evenodd"/></svg>
       </button>
       <a class="icon-button" href="https://github.com/rokokol/fly-vs-cybersafe-lct2026" aria-label="Source on GitHub" title="Source on GitHub">
@@ -265,7 +166,7 @@
     </section>
 
     <aside class="panel" aria-label="Readouts">
-      <section class="card finale" id="finale" hidden aria-live="polite">
+      <section class="card done" id="finale" hidden aria-live="polite">
         <h2 id="finale-title">SAFE OPEN</h2>
         <p id="finale-lead"></p>
         <dl class="kv" id="finale-kv"></dl>
@@ -293,10 +194,10 @@
       <section class="card" id="neuro-card" hidden>
         <h2>neuron activity</h2>
         <div class="bars">
-          <div class="bar-row"><span>odor ↑</span><div class="track"><span id="b-on" style="--fill:var(--ok)"></span></div></div>
-          <div class="bar-row"><span>odor ↓</span><div class="track"><span id="b-off" style="--fill:var(--danger)"></span></div></div>
-          <div class="bar-row"><span>RUN</span><div class="track"><span id="b-run" style="--fill:var(--accent-live)"></span></div></div>
-          <div class="bar-row"><span>TUMBLE</span><div class="track"><span id="b-tum" style="--fill:var(--accent)"></span></div></div>
+          <div class="bar-row"><span>odor ↑</span><div class="track"><span id="b-on" style="--fill:var(--ddlc-ok)"></span></div></div>
+          <div class="bar-row"><span>odor ↓</span><div class="track"><span id="b-off" style="--fill:var(--ddlc-danger)"></span></div></div>
+          <div class="bar-row"><span>RUN</span><div class="track"><span id="b-run" style="--fill:var(--ddlc-accent-live)"></span></div></div>
+          <div class="bar-row"><span>TUMBLE</span><div class="track"><span id="b-tum" style="--fill:var(--ddlc-accent)"></span></div></div>
         </div>
       </section>
 
@@ -338,65 +239,25 @@
 <script>
 (function () {
   "use strict";
+  // The DDLC web kit's theme button and canvas helpers, inlined here by build_html.py:
+  // initTheme, color, ditherDisc, snapRect and startCloud
+  __DDLC_JS__
   const PIN = "__PIN__", DECRYPT = __DECRYPT_JSON__, STEP = __STEP_MS__;
   const MAXF = 4 * STEP, TAU = Math.PI * 2;
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // The canvas takes its colours from the CSS roles and the vendored palette, resolved
-  // through a probe, since a custom property reads back as written; readColors() runs
-  // again on every theme change
-  const probe = document.createElement("span");
-  probe.hidden = true;
-  document.body.appendChild(probe);
-  function resolve(css) { probe.style.color = css; return getComputedStyle(probe).color; }
-  function rgbOf(name) { return resolve("var(" + name + ")").match(/\d+/g).slice(0, 3).join(","); }
+  // The canvas takes its colours from the CSS roles and the palette through the kit's color();
+  // readColors() runs again on every theme change
+  function rgbOf(name) { return color(name).match(/\d+/g).slice(0, 3).join(","); }
   let colors;
   function readColors() {
     colors = {
-      field: resolve("var(--field)"), grid: resolve("var(--field-grid)"), label: resolve("var(--muted)"),
-      cloud: resolve("var(--cloud)"),
-      heat: [1, 2, 3, 4].map(function (k) { return resolve("var(--heat-" + k + ")"); }),
+      field: color("--field"), grid: color("--field-grid"), label: color("--ddlc-muted"),
+      heat: [1, 2, 3, 4].map(function (k) { return color("--heat-" + k); }),
       bow: rgbOf("--ddlc-bow"), blush: rgbOf("--ddlc-blush"), pink: rgbOf("--ddlc-pink"), ok: rgbOf("--ddlc-monika-eye"),
-      confetti: ["--ddlc-pink", "--ddlc-plum", "--ddlc-monika-eye", "--ddlc-rule", "--ddlc-blush", "--ddlc-bow"]
-        .map(function (n) { return resolve("var(" + n + ")"); }),
+      confetti: ["--ddlc-pink", "--ddlc-plum", "--ddlc-monika-eye", "--ddlc-rule", "--ddlc-blush", "--ddlc-bow"].map(color),
     };
   }
   readColors();
-
-  // Glows fade out by ordered dithering, as in easy-bitmap: a lattice cell is lit when the
-  // density at its distance beats that cell's threshold in an 8x8 Bayer matrix
-  function bayer(n) {
-    if (n === 1) return [[0]];
-    const m = bayer(n / 2), h = n / 2, out = [];
-    for (let y = 0; y < n; y++) out.push(new Array(n));
-    for (let y = 0; y < h; y++) for (let x = 0; x < h; x++) {
-      const v = 4 * m[y][x];
-      out[y][x] = v; out[y][x + h] = v + 2; out[y + h][x] = v + 3; out[y + h][x + h] = v + 1;
-    }
-    return out;
-  }
-  const BAYER = bayer(8).map(function (row) { return row.map(function (v) { return (v + 0.5) / 64; }); });
-  // Lights the cells of a lattice with pitch `p` and origin (x0, y0) inside a disc of
-  // radius r; the density is peak * (1 - (d / r)^2). A phase shifts the Bayer matrix
-  // across the lattice, so the same disc lights a different set of cells
-  function ditherDisc(c, x0, y0, p, cx, cy, r, peak, fill, phase) {
-    const ph = phase || 0;
-    if (r <= 0) return;
-    const gap = Math.max(1, Math.round(p / 4));
-    c.fillStyle = fill;
-    const i0 = Math.floor((cx - r - x0) / p), i1 = Math.ceil((cx + r - x0) / p);
-    const j0 = Math.floor((cy - r - y0) / p), j1 = Math.ceil((cy + r - y0) / p);
-    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
-      const dx = x0 + (i + 0.5) * p - cx, dy = y0 + (j + 0.5) * p - cy;
-      const density = peak * (1 - (dx * dx + dy * dy) / (r * r));
-      if (density > BAYER[(j + ph) & 7][(i + 3 * ph) & 7]) snapRect(c, x0 + i * p, y0 + j * p, p - gap, p - gap);
-    }
-  }
-  // Fills a rectangle with its edges rounded to whole pixels: a fractional pitch then
-  // gives cells one pixel apart in size instead of blurred edges
-  function snapRect(c, x, y, w, h) {
-    const x0 = Math.round(x), y0 = Math.round(y);
-    c.fillRect(x0, y0, Math.round(x + w) - x0, Math.round(y + h) - y0);
-  }
 
   // the fly is a real fruit-fly photo (head up), a few frames cycled for a
   // wing-flap; the cartoon is the fallback until the frames decode
@@ -555,7 +416,8 @@
     const still = REDUCED ? 0 : 1;
     const cx = tx + still * 0.5 * cell * Math.cos(ts / 900), cy = ty + still * 0.5 * cell * Math.sin(ts / 1300);
     const r = cell * (2.8 + still * 0.6 * Math.sin(ts / 350));
-    ditherDisc(ctx, ox, oy, lat, cx, cy, r, 1, "rgba(" + colors.bow + ",0.8)", still * Math.floor(ts / 140));
+    ditherDisc(ctx, { x0: ox, y0: oy, pitch: lat, cx: cx, cy: cy, r: r, fill: "rgba(" + colors.bow + ",0.8)",
+      phase: still * Math.floor(ts / 140) });
     ctx.fillStyle = "rgb(" + colors.bow + ")";
     snapRect(ctx, tx - cell / 2, ty - cell / 2, cell, cell);
   }
@@ -600,7 +462,8 @@
     const landed = trace[cur2].accepted;
     // the halo stays on the field's lattice while the fly moves over it
     const pulse = REDUCED ? 1 : 0.8 + 0.2 * Math.sin(ts / 200), gr = Math.max(cell, 9 * dpr) * 3.4 * pulse;
-    ditherDisc(ctx, ox, oy, lat, fxp, fyp, gr, 0.75, "rgba(" + (landed ? colors.ok : colors.pink) + ",0.6)");
+    ditherDisc(ctx, { x0: ox, y0: oy, pitch: lat, cx: fxp, cy: fyp, r: gr, peak: 0.75,
+      fill: "rgba(" + (landed ? colors.ok : colors.pink) + ",0.6)" });
     ctx.save(); ctx.translate(fxp, fyp);
     ctx.rotate(angle + Math.PI / 2); if (!REDUCED) ctx.rotate(0.05 * Math.sin(ts / 70));
     const img = flyFrame(ts);
@@ -668,43 +531,8 @@
     requestAnimationFrame(loop);
   }
 
-  // The background: a dithered ball on a 6 px lattice that trails the pointer on a spring,
-  // after easy-bitmap's cloud. It draws only while something moves, and never under
-  // prefers-reduced-motion
-  const cloud = (function () {
-    const cv = document.getElementById("cloud"), c = cv.getContext("2d");
-    const CELL = 6, RADIUS = 150, STIFFNESS = 0.08, DAMPING = 0.72;
-    const goal = { x: innerWidth / 2, y: innerHeight / 2 }, centre = { x: goal.x, y: goal.y }, vel = { x: 0, y: 0 };
-    let size = 0, shown = false, frame = 0;
-    function draw() {
-      c.clearRect(0, 0, innerWidth, innerHeight);
-      if (size >= 0.02) ditherDisc(c, 0, 0, CELL, centre.x, centre.y, RADIUS * size, 1, colors.cloud);
-    }
-    function resize() {
-      const r = window.devicePixelRatio || 1;
-      cv.width = Math.round(innerWidth * r); cv.height = Math.round(innerHeight * r);
-      c.setTransform(r, 0, 0, r, 0, 0);
-      draw();
-    }
-    function step() {
-      vel.x = (vel.x + (goal.x - centre.x) * STIFFNESS) * DAMPING;
-      vel.y = (vel.y + (goal.y - centre.y) * STIFFNESS) * DAMPING;
-      centre.x += vel.x; centre.y += vel.y;
-      size += ((shown ? 1 : 0) - size) * 0.12;
-      draw();
-      const moving = Math.abs(vel.x) + Math.abs(vel.y) > 0.05 || Math.abs((shown ? 1 : 0) - size) > 0.01;
-      frame = moving && !document.hidden ? requestAnimationFrame(step) : 0;
-    }
-    function kick() { if (!REDUCED && !frame) frame = requestAnimationFrame(step); }
-    function follow(e) { goal.x = e.clientX; goal.y = e.clientY; shown = true; kick(); }
-    addEventListener("pointermove", function (e) { if (e.pointerType !== "touch" || e.buttons) follow(e); });
-    addEventListener("pointerdown", follow);
-    addEventListener("pointerup", function (e) { if (e.pointerType === "touch") { shown = false; kick(); } });
-    document.documentElement.addEventListener("pointerleave", function () { shown = false; kick(); });
-    addEventListener("resize", resize);
-    resize();
-    return { recolor: draw };
-  })();
+  // The background: the kit's cloud, a dithered ball that trails the pointer
+  const cloud = startCloud(document.getElementById("cloud"));
 
   // controls
   function setMode(m) {
@@ -734,38 +562,18 @@
       if (v !== "") { target[i] = Number(v); if (i < 3) document.getElementById("p" + (i + 1)).focus(); hunt(); }
     });
   });
-  // theme: cycle auto -> light -> dark, auto by default, remembered per viewer; the
-  // 8x8 pixel icons (a monitor, a sun, a moon) are easy-bitmap's
-  const themeBtn = document.getElementById("theme"), themeIcon = document.getElementById("theme-icon");
-  const ICONS = {
-    auto: "M0 1h8v5H0zM1 2v3h6V2zM3 6h2v1H3zM2 7h4v1H2z",
-    light: "M3 0h2v1H3zM3 7h2v1H3zM0 3h1v2H0zM7 3h1v2H7zM2 2h4v4H2zM1 1h1v1H1zM6 1h1v1H6zM1 6h1v1H1zM6 6h1v1H6z",
-    dark: "M2 0h3v1H2zM1 1h2v1H1zM0 2h2v4H0zM1 6h2v1H1zM2 7h4v1H2zM5 6h2v1H5zM6 5h2v1H6z",
-  };
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+  // theme: the kit's button cycles system, light and dark, remembered per viewer
   function repaint() {
     readColors();
     cloud.recolor();
     if (field && field.length) fitCanvas();  // repaint the field once it exists
   }
-  function applyTheme(t) {
-    if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
-    else document.documentElement.removeAttribute("data-theme");
-    themeIcon.setAttribute("d", ICONS[t]);
-    themeBtn.title = "Theme: " + t;
-    themeBtn.setAttribute("aria-label", "Theme: " + t);
-    repaint();
-  }
-  let theme = "auto";
-  try { theme = localStorage.getItem("fly-theme") || "auto"; } catch (e) { /* private mode */ }
-  if (!ICONS[theme]) theme = "auto";
-  applyTheme(theme);
-  themeBtn.addEventListener("click", function () {
-    theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
-    applyTheme(theme);
-    try { localStorage.setItem("fly-theme", theme); } catch (e) { /* ignore */ }
+  initTheme({
+    button: document.getElementById("theme"),
+    icon: document.getElementById("theme-icon"),
+    key: "fly-theme",
+    onChange: repaint,
   });
-  prefersDark.addEventListener("change", function () { if (theme === "auto") repaint(); });
 
   window.addEventListener("resize", fitCanvas);
   // the axis labels use Departure Mono, so the field is drawn again once it has loaded

@@ -2,6 +2,11 @@
 
 Notable changes to Fly vs. CyberSafe. The project is unversioned, so entries are grouped by date, newest first
 
+## 2026-10-08
+
+- The page is drawn with the DDLC web kit of ddlc-themes, shared with easy-bitmap: the bar, the cards, the controls, the theme button and the background cloud come from there instead of a copy in the page
+- Captions and notes are a darker grey that reads on white
+
 ## 2026-10-07
 
 - The page is a full-window app in the pixel style of easy-bitmap: a header bar, square cards with hard shadows, controls on the left and readouts on the right

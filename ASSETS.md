@@ -19,11 +19,11 @@ Two side sprites need their exact source confirmed — tell the maintainer which
 | Departure Mono (`assets/DepartureMono-Regular.woff2`) — the interface and the data | Helena Zhang | [SIL OFL 1.1](assets/DepartureMono-LICENSE.txt) |
 | IBM Plex Sans (prose) — Google Fonts | IBM | SIL OFL 1.1 |
 
-Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`
+Departure Mono is embedded in the page as a data URI; its license text ships in `assets/DepartureMono-LICENSE.txt`. Both come through ddlc-themes, which vendors them from the font's upstream
 
-## Colours
+## Colours and the web kit
 
-`assets/ddlc-palette.css` is a copy of [ddlc-palette](https://github.com/rokokol/ddlc-palette), kept byte-equal to it by `vendor-sync.sh`; the palette measures the Doki Doki Literature Club colours off [ddlc.moe](https://ddlc.moe/). Doki Doki Literature Club is the property of [Team Salvato](https://teamsalvato.com/); this project is unaffiliated with and not endorsed by Team Salvato, uses no official artwork, and follows [their IP guidelines](https://teamsalvato.com/ip-guidelines) as non-commercial fan content
+`assets/ddlc-ui.css`, `assets/ddlc-theme.js` and `assets/ddlc-cloud.js` are copies of the web kit of [ddlc-themes](https://github.com/rokokol/ddlc-themes) (MIT), kept byte-equal to it by `vendor-sync.sh` and inlined into the page by `build_html.py`. The colours in them come from [ddlc-palette](https://github.com/rokokol/ddlc-palette), which measures the Doki Doki Literature Club colours off [ddlc.moe](https://ddlc.moe/). Doki Doki Literature Club is the property of [Team Salvato](https://teamsalvato.com/); this project is unaffiliated with and not endorsed by Team Salvato, uses no official artwork, and follows [their IP guidelines](https://teamsalvato.com/ip-guidelines) as non-commercial fan content
 
 ## Pixel style
 

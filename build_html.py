@@ -9,6 +9,7 @@ out/artifact.html (a bare fragment for publishing as an artifact)
 import argparse
 import base64
 import json
+import re
 from pathlib import Path
 
 import firmware
@@ -24,17 +25,27 @@ ASSETS = HERE / "assets"
 BODY_MARK = '<div class="wrap">'
 
 
-def font_data_uri():
-    """Return the Departure Mono woff2 as a data URI (SIL OFL, see ASSETS.md)"""
-    f = ASSETS / "DepartureMono-Regular.woff2"
-    if not f.exists():
-        return ""
-    return "data:font/woff2;base64," + base64.b64encode(f.read_bytes()).decode("ascii")
+KIT_FONT = 'url("DepartureMono-Regular.woff2")'
 
 
-def palette_css():
-    """Return the vendored DDLC palette, the one source of the page's colours"""
-    return (ASSETS / "ddlc-palette.css").read_text()
+def kit_css():
+    """Return the vendored DDLC web kit, the one source of the page's colours and controls,
+    with its font inlined as a data URI (SIL OFL, see ASSETS.md): the page is one file"""
+    css = (ASSETS / "ddlc-ui.css").read_text()
+    if KIT_FONT not in css:
+        raise SystemExit(f"assets/ddlc-ui.css no longer names its font as {KIT_FONT}")
+    font = base64.b64encode((ASSETS / "DepartureMono-Regular.woff2").read_bytes()).decode("ascii")
+    return css.replace(KIT_FONT, f'url("data:font/woff2;base64,{font}")')
+
+
+def kit_js():
+    """Return the kit's theme button and canvas helpers as plain declarations for the page's
+    one script. The vendored files are ES modules, and a module cannot be imported by a
+    script inlined beside it, so the build drops each top-level export keyword. A literal
+    </script in their comments would close the inline script early, so it is escaped"""
+    sources = [(ASSETS / name).read_text() for name in ("ddlc-theme.js", "ddlc-cloud.js")]
+    code = "\n".join(re.sub(r"^export ", "", source, flags=re.MULTILINE) for source in sources)
+    return code.replace("</script", "<\\/script")
 
 
 def sprite_data_uris():
@@ -73,11 +84,11 @@ def build(dump):
         .replace("__DECRYPT_JSON__", json.dumps(decrypt, separators=(",", ":")))
         .replace("__STEP_MS__", str(oracle.STEP_MS))
         .replace("__FLY_SPRITES__", json.dumps(sprite_data_uris()))
-        .replace("__DEPARTURE_WOFF2__", font_data_uri())
-        .replace("__DDLC_PALETTE__", palette_css())
+        .replace("__DDLC_UI__", kit_css())
+        .replace("__DDLC_JS__", kit_js())
         .replace("__PIN__", pin)
     )
-    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__", "__DEPARTURE_WOFF2__", "__DDLC_PALETTE__"):
+    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__", "__DDLC_UI__", "__DDLC_JS__"):
         if token in fragment:
             raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)
