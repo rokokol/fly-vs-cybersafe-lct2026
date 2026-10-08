@@ -1,8 +1,8 @@
 // Node tests for the browser fly engine (fly.js), mirroring the Python contract.
-// Run: node test_fly_node.js
+// Run: node tests/test_fly_node.js
 "use strict";
 const assert = require("assert");
-const F = require("./fly.js");
+const F = require("../fly.js");
 
 const TARGET = [3, 9, 5, 2];
 let passed = 0;

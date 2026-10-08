@@ -84,10 +84,10 @@ The page is self-contained and works as a static site, so it hosts on GitHub Pag
 To rebuild it, or to run the reference engine and the offline decrypt:
 
 ```bash
-python3 build_html.py                                     # rebuild index.html from the dump, engines and sprite
-python3 -m unittest test_oracle test_fly test_firmware    # the Python suite
-node test_fly_node.js && node test_fly_neuro_node.js      # the browser-engine suite
-python3 run_demo.py --noise 20                            # print one reference hunt and the real decrypt
+python3 build_html.py                                          # rebuild index.html from the dump, engines and sprite
+python3 -m unittest discover -s tests                          # the Python suite
+node tests/test_fly_node.js && node tests/test_fly_neuro_node.js  # the browser-engine suite
+python3 run_demo.py --noise 20                                 # print one reference hunt and the real decrypt
 ```
 
 ## The fly
@@ -114,7 +114,7 @@ Every sprite is cut from a licensed Wikimedia photo — credit and license per f
 | `index.html` | the ready-to-open page, generated and committed |
 | `assets/fly.png` | the fly sprite |
 | `data/backup_full.bin` | the 2 MiB flash dump of the safe |
-| `test_*.py`, `test_*_node.js` | the test suites |
+| `tests/` | the test suites |
 
 ## Provenance
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import firmware
 import run_demo
 
-DUMP = Path(__file__).resolve().parent / "data" / "backup_full.bin"
+DUMP = Path(__file__).resolve().parent.parent / "data" / "backup_full.bin"
 
 
 class ExtractPinTests(unittest.TestCase):

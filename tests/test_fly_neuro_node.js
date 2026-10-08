@@ -1,8 +1,8 @@
-// Node tests for the neural mode-A engine. Run: node test_fly_neuro_node.js
+// Node tests for the neural mode-A engine. Run: node tests/test_fly_neuro_node.js
 "use strict";
 const assert = require("assert");
-const F = require("./fly.js");
-const N = require("./fly_neuro.js");
+const F = require("../fly.js");
+const N = require("../fly_neuro.js");
 
 const TARGET = [3, 9, 5, 2];
 let passed = 0;
