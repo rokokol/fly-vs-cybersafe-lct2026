@@ -44,5 +44,16 @@ class FaviconTests(unittest.TestCase):
         self.assertIn(f'<link rel="icon" href="{build_html.FAVICON_OUT.name}" type="image/svg+xml">', page)
 
 
+class BrandTests(unittest.TestCase):
+    def test_title_mark_is_the_favicon_sprite(self):
+        fragment, _ = build_html.render(build_html.DEFAULT_DUMP)
+        brand = re.search(r'<h1 class="brand">(.*?)</h1>', fragment, re.S)
+        if brand is None:
+            self.fail("no brand heading in the page")
+        src = build_html.FAVICON_SPRITE.relative_to(build_html.HERE).as_posix()
+        self.assertRegex(brand.group(1), rf'<img [^>]*src="{re.escape(src)}"')
+        self.assertNotIn("<svg", brand.group(1))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -8,6 +8,7 @@ Notable changes to Fly vs. CyberSafe. The project is unversioned, so entries are
 - Captions and notes are a darker grey that reads on white
 - The heart beside the title stays on a phone
 - The page has a favicon: the fly seen from the side
+- The same fly stands beside the title in place of the heart
 
 ## 2026-10-07
 

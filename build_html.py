@@ -100,24 +100,34 @@ def wrap_standalone(fragment):
     )
 
 
-def build(dump):
+def render(dump):
+    """Return the artifact fragment and the device PIN, writing nothing"""
     template = TEMPLATE.read_text()
     pin = firmware.extract_pin(dump)
     decrypt = run_demo.decrypt_summary(dump)
-    fragment = (
-        template
-        .replace("__FLY_JS__", (HERE / "fly.js").read_text())
-        .replace("__NEURO_JS__", (HERE / "fly_neuro.js").read_text())
-        .replace("__DECRYPT_JSON__", json.dumps(decrypt, separators=(",", ":")))
-        .replace("__STEP_MS__", str(oracle.STEP_MS))
-        .replace("__FLY_SPRITES__", json.dumps(sprite_data_uris()))
-        .replace("__DDLC_UI__", kit_css())
-        .replace("__DDLC_JS__", kit_js())
-        .replace("__PIN__", pin)
-    )
-    for token in ("__FLY_JS__", "__NEURO_JS__", "__PIN__", "__DECRYPT_JSON__", "__STEP_MS__", "__FLY_SPRITES__", "__DDLC_UI__", "__DDLC_JS__"):
+    values = {
+        "__FLY_JS__": (HERE / "fly.js").read_text(),
+        "__NEURO_JS__": (HERE / "fly_neuro.js").read_text(),
+        "__DECRYPT_JSON__": json.dumps(decrypt, separators=(",", ":")),
+        "__STEP_MS__": str(oracle.STEP_MS),
+        "__FLY_SPRITES__": json.dumps(sprite_data_uris()),
+        # a path, not a data URI: the page links the sprite rather than carrying it
+        "__BRAND_ICON__": FAVICON_SPRITE.relative_to(HERE).as_posix(),
+        "__DDLC_UI__": kit_css(),
+        "__DDLC_JS__": kit_js(),
+        "__PIN__": pin,
+    }
+    fragment = template
+    for token, value in values.items():
+        fragment = fragment.replace(token, value)
+    for token in values:
         if token in fragment:
             raise SystemExit(f"placeholder {token} still present")
+    return fragment, pin
+
+
+def build(dump):
+    fragment, pin = render(dump)
     standalone = wrap_standalone(fragment)
     INDEX_OUT.write_text(standalone)
     FAVICON_OUT.write_text(favicon_svg())

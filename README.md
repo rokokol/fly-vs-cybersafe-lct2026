@@ -92,7 +92,7 @@ python3 run_demo.py --noise 20                                 # print one refer
 
 ## The fly
 
-The searcher is drawn from a real fruit-fly photo, cropped to a sprite. The page uses the top-down one, the favicon uses side a, and the others are cut and ready to swap in
+The searcher is drawn from a real fruit-fly photo, cropped to a sprite. The page uses the top-down one, the favicon and the mark beside the title use side a, and the others are cut and ready to swap in
 
 <div align="center">
 <img src="assets/fly.png" alt="dorsal" height="130"/>
