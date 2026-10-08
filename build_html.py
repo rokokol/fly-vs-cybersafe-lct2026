@@ -10,6 +10,7 @@ import argparse
 import base64
 import json
 import re
+import struct
 from pathlib import Path
 
 import firmware
@@ -22,6 +23,8 @@ DEFAULT_DUMP = HERE / "data" / "backup_full.bin"
 INDEX_OUT = HERE / "index.html"
 ARTIFACT_OUT = HERE / "out" / "artifact.html"
 ASSETS = HERE / "assets"
+FAVICON_SPRITE = ASSETS / "fly-side-a.png"
+FAVICON_OUT = HERE / "favicon.svg"
 BODY_MARK = '<div class="wrap">'
 
 
@@ -62,6 +65,29 @@ def sprite_data_uris():
     return ["data:image/png;base64," + base64.b64encode(p.read_bytes()).decode("ascii") for p in frames]
 
 
+def png_size(data):
+    """Return (width, height) from a PNG's IHDR chunk"""
+    return struct.unpack(">II", data[16:24])
+
+
+def favicon_svg():
+    """Return the favicon: the side sprite centred on a square canvas at its own size
+
+    A browser stretches a non-square icon to its square tab slot, and the standard
+    library cannot resize a PNG, so the SVG canvas does the padding. It is a separate
+    file rather than a data URI in the page, so the page does not carry the sprite twice
+    """
+    data = FAVICON_SPRITE.read_bytes()
+    width, height = png_size(data)
+    side = max(width, height)
+    uri = "data:image/png;base64," + base64.b64encode(data).decode("ascii")
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {side} {side}">'
+        f'<image href="{uri}" x="{(side - width) / 2:g}" y="{(side - height) / 2:g}" '
+        f'width="{width}" height="{height}"/></svg>\n'
+    )
+
+
 def wrap_standalone(fragment):
     """Wrap the artifact fragment in a full HTML document for local use and Pages"""
     cut = fragment.index(BODY_MARK)
@@ -69,6 +95,7 @@ def wrap_standalone(fragment):
     return (
         "<!doctype html>\n<html lang=\"en\">\n<head>\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+        f'<link rel="icon" href="{FAVICON_OUT.name}" type="image/svg+xml">\n'
         f"{head}</head>\n<body>\n{body}</body>\n</html>\n"
     )
 
@@ -93,6 +120,7 @@ def build(dump):
             raise SystemExit(f"placeholder {token} still present")
     standalone = wrap_standalone(fragment)
     INDEX_OUT.write_text(standalone)
+    FAVICON_OUT.write_text(favicon_svg())
     ARTIFACT_OUT.parent.mkdir(parents=True, exist_ok=True)
     ARTIFACT_OUT.write_text(fragment)
     return standalone, fragment, pin
@@ -104,6 +132,7 @@ def main():
     args = parser.parse_args()
     standalone, fragment, pin = build(args.dump)
     print(f"index.html      : {INDEX_OUT} ({len(standalone):,} bytes) — open in a browser / GitHub Pages")
+    print(f"favicon.svg     : {FAVICON_OUT} — linked by index.html")
     print(f"artifact.html   : {ARTIFACT_OUT} ({len(fragment):,} bytes) — publish as an artifact")
     print(f"embedded PIN    : {pin} (editable in the page)")
 

@@ -41,9 +41,9 @@ jobs:
           node tests/test_fly_node.js
           node tests/test_fly_neuro_node.js
 
-      # index.html is committed for GitHub Pages; it must be what the template and the
-      # vendored palette build today
+      # index.html and favicon.svg are committed for GitHub Pages; they must be what the
+      # template, the vendored palette and the sprite build today
       - name: Build the page
         run: |
           python build_html.py
-          git diff --exit-code -- index.html
+          git diff --exit-code -- index.html favicon.svg

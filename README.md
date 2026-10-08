@@ -92,7 +92,7 @@ python3 run_demo.py --noise 20                                 # print one refer
 
 ## The fly
 
-The searcher is drawn from a real fruit-fly photo, cropped to a sprite. The page uses the top-down one; the others are cut and ready to swap in
+The searcher is drawn from a real fruit-fly photo, cropped to a sprite. The page uses the top-down one, the favicon uses side a, and the others are cut and ready to swap in
 
 <div align="center">
 <img src="assets/fly.png" alt="dorsal" height="130"/>
@@ -111,7 +111,7 @@ Every sprite is cut from a licensed Wikimedia photo — credit and license per f
 | `oracle.py`, `fly.py`, `firmware.py` | the reference engine in Python: timing leak, run-and-tumble, PIN and cipher |
 | `fly.js`, `fly_neuro.js` | the browser engines: bacterium and neural, run live on the page |
 | `template.html`, `build_html.py` | build the self-contained page |
-| `index.html` | the ready-to-open page, generated and committed |
+| `index.html`, `favicon.svg` | the ready-to-open page and its icon, generated and committed |
 | `assets/fly.png` | the fly sprite |
 | `data/backup_full.bin` | the 2 MiB flash dump of the safe |
 | `tests/` | the test suites |
