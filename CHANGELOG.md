@@ -6,6 +6,7 @@ Notable changes to Fly vs. CyberSafe. The project is unversioned, so entries are
 
 - The page is drawn with the DDLC web kit of ddlc-themes, shared with easy-bitmap: the bar, the cards, the controls, the theme button and the background cloud come from there instead of a copy in the page
 - Captions and notes are a darker grey that reads on white
+- The heart beside the title stays on a phone
 
 ## 2026-10-07
 
