@@ -4,7 +4,7 @@
 # works: references/bump-cascade.md in https://github.com/rokokol/ci-skill
 vendor-sync.sh rokokol/ci-skill templates/vendor-sync.sh 00b049fe781ae89863459638a7ee01047fe11e87 1095262478484520267758a24b7ea9e057ca5204
 .github/workflows/vendor-sync.yml rokokol/ci-skill templates/github/workflows/vendor-sync.yml fc54eb000b55d210a9a54fa619371418bf3121a6 a5bde77f98d55a43b2c993f4c96a952e0b68010d manual
-assets/ddlc-ui.css rokokol/ddlc-themes dist/ddlc-ui.css 163bd25741c180a0287b4efebe269633e14d8710 d2ab9a4fd823e6cd840d9f057dcc5fd0fa3ab464
+assets/ddlc-ui.css rokokol/ddlc-themes dist/ddlc-ui.css 332a5dd04755f81cc9b307fff7691fa9856d22ff 0ff99f6e6333c3de8fb2bd8f9751fae5b5ec1825
 assets/ddlc-theme.js rokokol/ddlc-themes dist/ddlc-theme.js b06ac2320866c090f467f98e510b4e6a15d6d74b 12ec9eda878a5794061bb7bd21d71dd4feddd045
 assets/ddlc-cloud.js rokokol/ddlc-themes dist/ddlc-cloud.js b06ac2320866c090f467f98e510b4e6a15d6d74b 981b9b58d7b5be7a61f2b7b4ab06c6d3b5a9fdf8
 assets/DepartureMono-Regular.woff2 rokokol/ddlc-themes dist/DepartureMono-Regular.woff2 b06ac2320866c090f467f98e510b4e6a15d6d74b b4a23dc1dad1c934005d0862e62c0294636afb08
